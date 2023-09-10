@@ -1,0 +1,9 @@
+{
+    "autoload": {
+        "psr-4": {
+            "Controllers\\": "controllers/"
+        }
+    },
+    "require": {
+        "gabordemooij/redbean": "^5.7"    }
+}
