@@ -48,4 +48,10 @@ class DataBaseController
         $user = R::findOne('users', 'telegram = ?', [$telegram]);
         return $user->tokens;
     }
+    public static function randTemp($id){
+        $user = R::findOne('users', 'telegram = ?', [$id]);
+        $user->tempkey = rand(10000000000000000, 99999000000000000);
+        R::store($user);
+        return $user->tempkey;
+    }
 }

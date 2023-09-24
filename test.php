@@ -1,6 +1,5 @@
 <?php
-    $id = '321123';
-        $tempkey = rand(10000, 99999);
-        r::exec("UPDATE users SET tempkey = $tempkey WHERE id = $id");
-        echo $link = file_get_contents("http://adfoc.us/api/?key=4a950ed379959bde2fe57166af3ede54&url=http://clothesremoved.com/link.php?id=$id&tempkey=$tempkey");
-    
+$raw = file_get_contents("https://clicksfly.com/api?api=245362e1a50e0e07a022f4d9dbf58f30f642be80&url=localhost.com/index.php?id=1?tempkey=1");
+$clean = json_decode($raw, true);
+echo $clean['shortenedUrl'];
+?>

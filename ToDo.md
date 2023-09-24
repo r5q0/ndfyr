@@ -28,7 +28,6 @@ $6 - 1000
 0.006/ 1
 5 ads = 0.03
 500 ads day = 100 tokens
-
 0.2 tokens for linkvertise
 0.15 tokens for ad focus
 ----0.3 tokens for short link----

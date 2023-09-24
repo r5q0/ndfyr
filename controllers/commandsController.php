@@ -21,6 +21,7 @@ use SergiX44\Nutgram\Telegram\Types\BaseType;
 use SergiX44\Nutgram\Telegram\Types\Internal\Uploadable;
 use Controllers\DataBaseController;
 use SergiX44\Nutgram\Telegram\Types\Payment\PreCheckoutQuery;
+use Controllers\AdvertisementsController;
 
 class CommandsController
 {
@@ -61,13 +62,14 @@ class CommandsController
         self::$bot->onCommand('start', function () {
             self::DatabaseListener('/start');
             self::$bot->SendPhoto(
-                photo: InputFile::make(fopen('../1.png', 'rb')),
+                photo: InputFile::make(fopen('../example-1.png', 'rb')),
                 caption: 'Welcome To our bot',
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(
                         InlineKeyboardButton::make('My Account', callback_data: '/me'),
                         InlineKeyboardButton::make('Channel', url: 'https://t.me/ClothesRemovedGroup')
                     )->addRow(
+                        InlineKeyboardButton::make('Free Tokens', callback_data: '/freetokens'),
                         InlineKeyboardButton::make('Buy', callback_data: '/buy')
                     )
             );
@@ -81,7 +83,37 @@ class CommandsController
             self::BuyMessage();
             self::DatabaseListener('/buy');
         });
+        self::$bot->onCallbackQueryData('/freetokens', function () {
+            self::$bot->sendMessage(
+                'We offer free tokens for our users to get free tokens you need to invite your friends to our bot and you will get 1 token for each friend you invite.Or you can get tokens free of charge by watching advertisements',
+                reply_markup: InlineKeyboardMarkup::make()
+                    ->addRow(
+                        InlineKeyboardButton::make('Advertisements', callback_data: '/ads'),
+                        InlineKeyboardButton::make('Affiliate', callback_data: '/affiliate')
+                    )
+                );
+                                self::DatabaseListener('/freetokens');
+            });
+            
+            self::$bot->onCallbackQueryData('/ads', function () {
+                $link = AdvertisementsController::getLinkClicksFly(self::$bot->userId());
+                self::$bot->sendMessage(
+                'We offer free tokens for our users to get free tokens you need to invite your friends to our bot and you will get 1 token for each friend you invite.Or you can get tokens free of charge by watching advertisements',
+                reply_markup: InlineKeyboardMarkup::make()
+                    ->addRow(
+                        InlineKeyboardButton::make('Linkversite(0.5)', callback_data: '/ads'),
+                        inlinekeyboardButton::make('ClicksFly(0.2)', url: $link)
+                    )
+
+            );
+            self::DatabaseListener('/ads');
+        });
     }
+    public static function FreeTokens()
+    {
+    }
+
+
     public static function buy($quantity)
     {
 
@@ -106,11 +138,7 @@ class CommandsController
                 )->addRow(
                     InlineKeyboardButton::make('100 Tokens (10$)', url: self::buy(100)),
                     InlineKeyboardButton::make('500 Tokens (25$)', url: self::buy(500))
-
                 )
-
-
-
 
         );
     }
@@ -139,7 +167,6 @@ class CommandsController
         self::$bot->onSuccessfulPaymentPayload('100', function () {
             DataBaseController::AddTokens(self::$bot->userId(), 100);
             self::$bot->sendMessage('You have successfully bought 100 tokens');
-
         });
 
         self::$bot->onSuccessfulPaymentPayload('500', function () {

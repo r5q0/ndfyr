@@ -8,10 +8,11 @@ R::freeze(true);
 R::exec('CREATE TABLE IF NOT EXISTS `users` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `username` VARCHAR(255) NOT NULL,
-    `tokens` INT DEFAULT 1,
+    `tokens` Float DEFAULT 1,
     `ip` VARCHAR(255),
     `language` VARCHAR(255),
     `telegram` varchar(255) NOT NULL UNIQUE,
+    `tempkey` varchar(255) UNIQUE,
     `premium` boolean DEFAULT false,
     dateCreated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )');
