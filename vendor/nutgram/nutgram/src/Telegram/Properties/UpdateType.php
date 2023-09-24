@@ -4,7 +4,6 @@ namespace SergiX44\Nutgram\Telegram\Properties;
 
 enum UpdateType: string
 {
-    case UNKNOWN = 'unknown';
     case MESSAGE = 'message';
     case EDITED_MESSAGE = 'edited_message';
     case CHANNEL_POST = 'channel_post';

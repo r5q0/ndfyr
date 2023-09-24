@@ -20,6 +20,7 @@ use SergiX44\Nutgram\Telegram\Properties\InputMediaType;
 use SergiX44\Nutgram\Telegram\Types\BaseType;
 use SergiX44\Nutgram\Telegram\Types\Internal\Uploadable;
 use Controllers\DataBaseController;
+use SergiX44\Nutgram\Telegram\Types\Payment\PreCheckoutQuery;
 
 class CommandsController
 {
@@ -29,10 +30,16 @@ class CommandsController
     private static $bot;
     public function __construct($token)
     {
-        self::$bot = new Nutgram($token);
+        self::$bot = new Nutgram('5971524781:AAF6CcvpST9I9A8G9miZD1C3hK2XNDSts4g', new Configuration(
+            logger: ConsoleLogger::class
+        ));
         self::CommandStart();
-        self::$bot->run();
 
+        self::$bot->onPreCheckoutQuery(function () {
+            self::$bot->answerPreCheckoutQuery(true);
+        });
+        self::PaymentListener();
+        self::$bot->run();
     }
     public static function DatabaseListener($text)
     {
@@ -79,14 +86,14 @@ class CommandsController
     {
 
         $USD = ($quantity == 20) ? 3 : (($quantity == 40) ? 5 : (($quantity == 100) ? 10 : (($quantity == 500) ? 25 : 100000)));
-        
 
-            $labeledPrices = [
-                ['label' => "$quantity Tokens", 'amount' => $USD * 100],
-            ];
-        
-            $link = self::$bot->createInvoiceLink("$quantity Tokens", 'Ndfyr Tokens', $quantity, '284685063:TEST:NmZjMzAyYjVjOGEy', 'USD', $labeledPrices);
-            return $link;
+
+        $labeledPrices = [
+            ['label' => "$quantity Tokens", 'amount' => $USD * 100],
+        ];
+
+        $link = self::$bot->createInvoiceLink("$quantity Tokens", 'Ndfyr Tokens', $quantity, '284685063:TEST:NmZjMzAyYjVjOGEy', 'USD', $labeledPrices);
+        return $link;
     }
     public static function BuyMessage()
     {
@@ -116,14 +123,30 @@ class CommandsController
         $tokens = DataBaseController::GetTokens($id);
         self::$bot->sendMessage(" Your ID: $id\n Your Username: $username\n Your Language Code: $language_code\n Your Tokens: $tokens ");
     }
-    public static function PaymentListener(){
+    public static function PaymentListener()
+    {
 
-            self::$bot->onSuccessfulPaymentPayload('50', $result (){
+        self::$bot->onSuccessfulPaymentPayload('20', function () {
+            DataBaseController::AddTokens(self::$bot->userId(), 20);
+            self::$bot->sendMessage('You have successfully bought 20 tokens');
+        });
 
+        self::$bot->onSuccessfulPaymentPayload('40', function () {
+            DataBaseController::AddTokens(self::$bot->userId(), 40);
+            self::$bot->sendMessage('You have successfully bought 40 tokens');
+        });
 
+        self::$bot->onSuccessfulPaymentPayload('100', function () {
+            DataBaseController::AddTokens(self::$bot->userId(), 100);
+            self::$bot->sendMessage('You have successfully bought 100 tokens');
 
-            });}
+        });
 
+        self::$bot->onSuccessfulPaymentPayload('500', function () {
+            DataBaseController::AddTokens(self::$bot->userId(), 500);
+            self::$bot->sendMessage('You have successfully bought 500 tokens if you need assistance contact @emperorvespid');
+        });
+    }
 
     public static function getFile($id)
     {

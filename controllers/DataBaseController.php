@@ -20,6 +20,12 @@ class DataBaseController
         }
     }   
 
+    public static function AddTokens($id, $amount){
+        $user = R::findOne('users', 'telegram = ?', [$id]);
+        $user->tokens = $user->tokens + $amount;
+        R::store($user);
+    }
+
     public static function InsertMessage($telegram, $logg)
     {
         $message = R::dispense('messages');
