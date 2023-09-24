@@ -2,108 +2,141 @@
 
 namespace Controllers;
 
+include_once '../vendor/autoload.php';
+
+use SergiX44\Nutgram\Logger\ConsoleLogger;
+use SergiX44\Nutgram\Configuration;
+use SergiX44\Nutgram\Conversations\Conversation;
+use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\ReplyKeyboardMarkup;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\KeyboarndButton;
+use SergiX44\Nutgram\Telegram\Properties\MessageType;
 use RedBeanPHP\R;
+use SergiX44\Nutgram\Telegram\Types\Input\InputMediaPhoto;
+use SergiX44\Nutgram\Telegram\Types\Internal\InputFile;
+use SergiX44\Nutgram\Telegram\Properties\InputMediaType;
+use SergiX44\Nutgram\Telegram\Types\BaseType;
+use SergiX44\Nutgram\Telegram\Types\Internal\Uploadable;
+use Controllers\DataBaseController;
 
-R::setup('mysql:host=localhost;dbname=telegrambotCR', 'root', '');
-class commandsController
+class CommandsController
 {
-    private static $token = '6543867536:AAGV0XaAyLcqU8LXpJuji7TubC-18tik0ho';
-    private static $offset = 0;
-
-    public static function listen()
+    // $bot = new Nutgram('5971524781:AAF6CcvpST9I9A8G9miZD1C3hK2XNDSts4g', new Configuration(
+    //     logger: ConsoleLogger::class
+    // ));
+    private static $bot;
+    public function __construct($token)
     {
-        while (true) {
-            $updates = json_decode(file_get_contents("https://api.telegram.org/bot" . self::$token . "/getUpdates?offset=" . self::$offset), true);
-            if (!empty($updates['result'])) {
-                foreach ($updates['result'] as $update) {
-                    $telegram_id = $update['message']['from']['id'];
-                    $user = R::findOne('users', 'telegram_id = ?', [$telegram_id]);
-                    if (!$user) {
-                        self::$offset = $update['update_id'] + 1;
-                        self::createUser($update);
-                    }
-                    if (isset($update['message']['photo'])) {
-                        $photo = $update['message']['photo'][3]['file_id'];
-                        $fileId = self::getFile($photo);
-                        self::getPhoto($fileId);
+        self::$bot = new Nutgram($token);
+        self::CommandStart();
+        self::$bot->run();
 
-                        self::$offset = $update['update_id'] + 1;
-                    }
+    }
+    public static function DatabaseListener($text)
+    {
 
-                    if (isset($update['message']['text'])) {
+        $userId = self::$bot->userId();
+        $userExist = DataBaseController::UserExists($userId);
 
-                        $messages = R::dispense('messages');
-                        $messages->telegram_id = $update['message']['from']['id'];
-                        $messages->message = $update['message']['text'];
-                        R::store($messages);
-
-                        if (strpos($update['message']['text'], '/') === 0) {
-                            $messageText = $update['message']['text'];
-                            $chatId = $update['message']['from']['id'];
-                            self::commandHandler($chatId, $messageText);
-                            self::$offset = $update['update_id'] + 1;
-                        }
-                    }
-                }
-            }
-            sleep(1);
+        $username = self::$bot->user()->username;
+        $language_code = self::$bot->user()->language_code;
+        if ($userExist == false) {
+            DataBaseController::InsertUser($username, $userId, $language_code);
         }
-    }
-    public static function createUser($data)
-    {
-        $userid = $data['message']['from']['id'];
-        $username = $data['message']['from']['username'];
-        $user = R::dispense('users');
-        $user->telegram_id = $userid;
-        $user->username = $username;
-        R::store($user);
+        DataBaseController::InsertMessage($userId, $text);
     }
 
-    public static function commandHandler($chatId, $methodName)
+    public static function CommandStart()
     {
-        $methodName = str_replace('/', '', $methodName);
-        method_exists(__CLASS__, $methodName) ? self::$methodName($chatId) : self::sendMessage($chatId, "Command not recognized: $methodName");
-    }
 
-    public static function start($chatId)
+        self::$bot->onCommand('start', function () {
+            self::DatabaseListener('/start');
+            self::$bot->SendPhoto(
+                photo: InputFile::make(fopen('../1.png', 'rb')),
+                caption: 'Welcome To our bot',
+                reply_markup: InlineKeyboardMarkup::make()
+                    ->addRow(
+                        InlineKeyboardButton::make('My Account', callback_data: '/me'),
+                        InlineKeyboardButton::make('Channel', url: 'https://t.me/ClothesRemovedGroup')
+                    )->addRow(
+                        InlineKeyboardButton::make('Buy', callback_data: '/buy')
+                    )
+            );
+        });
+
+        self::$bot->onCallbackQueryData('/me', function () {
+            self::UserInfo();
+            self::DatabaseListener('/me');
+        });
+        self::$bot->onCallbackQueryData('/buy', function () {
+            self::BuyMessage();
+            self::DatabaseListener('/buy');
+        });
+    }
+    public static function buy($quantity)
     {
-        self::sendMessage(
-            $chatId,
-            "Your Account Status\n━━━━━━━━━\nID:\nName:\nUsername:  \nTokens:\nPlan: Free User\nAntispam: *Enabled* \nLanguage: English\n━━━━━━━━━\n\nBot Status: `Online`"
+
+        $USD = ($quantity == 20) ? 3 : (($quantity == 40) ? 5 : (($quantity == 100) ? 10 : (($quantity == 500) ? 25 : 100000)));
+        
+
+            $labeledPrices = [
+                ['label' => "$quantity Tokens", 'amount' => $USD * 100],
+            ];
+        
+            $link = self::$bot->createInvoiceLink("$quantity Tokens", 'Ndfyr Tokens', $quantity, '284685063:TEST:NmZjMzAyYjVjOGEy', 'USD', $labeledPrices);
+            return $link;
+    }
+    public static function BuyMessage()
+    {
+        self::$bot->sendMessage(
+            'text',
+            reply_markup: InlineKeyboardMarkup::make()
+                ->addRow(
+                    InlineKeyboardButton::make('20 Tokens (3$', url: self::buy(20)),
+                    InlineKeyboardButton::make('40 Tokens (5$)', url: self::buy(40))
+                )->addRow(
+                    InlineKeyboardButton::make('100 Tokens (10$)', url: self::buy(100)),
+                    InlineKeyboardButton::make('500 Tokens (25$)', url: self::buy(500))
+
+                )
+
+
 
 
         );
     }
 
-    public static function sendMessage($chatId, $text)
+    public static function UserInfo()
     {
-        $url = "https://api.telegram.org/bot" . self::$token . "/sendMessage?parse_mode=markdown";
-        $data = ['chat_id' => $chatId, 'text' => $text];
-        $options = ['http' => ['method' => 'POST', 'header' => "Content-Type: application/x-www-form-urlencoded\r\n", 'content' => http_build_query($data)]];
-        $context = stream_context_create($options);
-        file_get_contents($url, false, $context);
+        $id = self::$bot->userId();
+        $username = self::$bot->user()->username;
+        $language_code = self::$bot->user()->language_code;
+        $tokens = DataBaseController::GetTokens($id);
+        self::$bot->sendMessage(" Your ID: $id\n Your Username: $username\n Your Language Code: $language_code\n Your Tokens: $tokens ");
     }
+    public static function PaymentListener(){
+
+            self::$bot->onSuccessfulPaymentPayload('50', $result (){
+
+
+
+            });}
+
 
     public static function getFile($id)
     {
-        $url = "https://api.telegram.org/bot" . self::$token . "/getFile?file_id=$id";
+        $url = "https://api.telegram.org/bot" . $GLOBALS['bot']->getToken() . "/getFile?file_id=$id";
         $rawdata = file_get_contents($url);
         $data = json_decode($rawdata, true);
         return $data['result']['file_path'];
     }
+
     public static function getPhoto($id)
     {
-        $url = "https://api.telegram.org/file/bot" . self::$token . "/$id";
+        $url = "https://api.telegram.org/file/bot" . $GLOBALS['bot']->getToken() . "/$id";
         file_put_contents('../images/image.jpg', file_get_contents($url));
         echo "done";
     }
-    public static function freeToken($id)
-    {
-        $tempkey = rand(10000, 99999);
-        r::exec("UPDATE users SET tempkey = $tempkey WHERE telegram_id = $id");
-        $link = file_get_contents("http://adfoc.us/api/?key=4a950ed379959bde2fe57166af3ede54&url=http://clothesremoved.com/link.php?id=$id&tempkey=$tempkey");
-        self::sendMessage($id, $link);
-    }
-
 }
-
