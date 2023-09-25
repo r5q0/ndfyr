@@ -96,13 +96,14 @@ class CommandsController
             });
             
             self::$bot->onCallbackQueryData('/ads', function () {
-                $link = AdvertisementsController::getLinkClicksFly(self::$bot->userId());
+                $clicksfly = AdvertisementsController::getLinkClicksFly(self::$bot->userId());
+                $linkvertised = AdvertisementsController::getLinkVertise(self::$bot->userId());
                 self::$bot->sendMessage(
                 'We offer free tokens for our users to get free tokens you need to invite your friends to our bot and you will get 1 token for each friend you invite.Or you can get tokens free of charge by watching advertisements',
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(
-                        InlineKeyboardButton::make('Linkversite(0.5)', callback_data: '/ads'),
-                        inlinekeyboardButton::make('ClicksFly(0.2)', url: $link)
+                        InlineKeyboardButton::make('Linkversite(0.5)', url: $linkvertised),
+                        inlinekeyboardButton::make('ClicksFly(0.2)', url: $clicksfly)
                     )
 
             );
