@@ -25,9 +25,6 @@ use Controllers\AdvertisementsController;
 
 class CommandsController
 {
-    // $bot = new Nutgram('5971524781:AAF6CcvpST9I9A8G9miZD1C3hK2XNDSts4g', new Configuration(
-    //     logger: ConsoleLogger::class
-    // ));
     public static $bot;
     public function __construct($token)
     {
@@ -105,7 +102,7 @@ class CommandsController
                                 self::DatabaseListener('/freetokens');
             });
             self::$bot->onCallbackQueryData('/affiliate', function(){
-                $link = 't./me/ndfyrbot?start=' . self::$bot->userId();
+                $link = 't.me/ndfyr_bot?start=' . self::$bot->userId();
                 self::$bot->sendMessage("You will gain 1 token everytime somebody joins using your link.\n Your link is: $link");
             });
             
@@ -186,6 +183,7 @@ class CommandsController
 
         self::$bot->onSuccessfulPaymentPayload('500', function () {
             DataBaseController::AddTokens(self::$bot->userId(), 500);
+            DataBaseController::setPremium(self::$bot->userId());
             self::$bot->sendMessage('You have successfully bought 500 tokens if you need assistance contact @emperorvespid');
         });
     }
