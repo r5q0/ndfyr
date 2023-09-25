@@ -14,6 +14,7 @@ R::exec('CREATE TABLE IF NOT EXISTS `users` (
     `telegram` varchar(255) NOT NULL UNIQUE,
     `tempkey` varchar(255) UNIQUE,
     `premium` boolean DEFAULT false,
+    `affiliate` boolean DEFAULT false,
     dateCreated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )');
 

@@ -1,0 +1,30 @@
+{
+    "denoising_strength": 0,
+    "firstphase_width": 0,
+    "firstphase_height": 0,
+    "prompt": "shoes",
+    "seed": -1,
+    "subseed": -1,
+    "subseed_strength": 0,
+    "seed_resize_from_h": -1,
+    "seed_resize_from_w": -1,
+    "sampler_name": "Euler",
+    "batch_size": 1,
+    "n_iter": 1,
+    "steps": 25,
+    "cfg_scale": 7,
+    "width": 512,
+    "height": 512,
+    "restore_faces": false,
+    "tiling": false,
+    "do_not_save_samples": false,
+    "do_not_save_grid": false,
+    "negative_prompt": "feet",
+    "script_args": [],
+    "sampler_index": "Euler",
+    "alwayson_scripts": {
+        "Dynamic Thresholding (CFG Scale Fix)": {
+            "args": [true, 7, 100, "Half Cosine Up", 5, "Half Cosine Up", 5, 4.0]
+        }
+    }
+}

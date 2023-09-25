@@ -18,4 +18,5 @@ enum UpdateType: string
     case MY_CHAT_MEMBER = 'my_chat_member';
     case CHAT_MEMBER = 'chat_member';
     case CHAT_JOIN_REQUEST = 'chat_join_request';
+    case PAYLOAD = 'payload';
 }

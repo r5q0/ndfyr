@@ -28,7 +28,7 @@ class CommandsController
     // $bot = new Nutgram('5971524781:AAF6CcvpST9I9A8G9miZD1C3hK2XNDSts4g', new Configuration(
     //     logger: ConsoleLogger::class
     // ));
-    private static $bot;
+    public static $bot;
     public function __construct($token)
     {
         self::$bot = new Nutgram('5971524781:AAF6CcvpST9I9A8G9miZD1C3hK2XNDSts4g', new Configuration(
@@ -59,10 +59,20 @@ class CommandsController
     public static function CommandStart()
     {
 
+        self::$bot->onText('.*', function (Nutgram $bot) {
+            $text = $bot->message()->text;
+            if (preg_match('/\/start.(\d*)/', $text, $matches)) {
+                $affiliate = $matches[1];
+                $id = $bot->userId();
+                DataBaseController::setAffiliateTrue($id, $affiliate);
+            }
+            
+
+            });
         self::$bot->onCommand('start', function () {
             self::DatabaseListener('/start');
             self::$bot->SendPhoto(
-                photo: InputFile::make(fopen('../example-1.png', 'rb')),
+                photo: InputFile::make(fopen('../dat.png', 'rb')),
                 caption: 'Welcome To our bot',
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(
@@ -93,6 +103,10 @@ class CommandsController
                     )
                 );
                                 self::DatabaseListener('/freetokens');
+            });
+            self::$bot->onCallbackQueryData('/affiliate', function(){
+                $link = 't./me/ndfyrbot?start=' . self::$bot->userId();
+                self::$bot->sendMessage("You will gain 1 token everytime somebody joins using your link.\n Your link is: $link");
             });
             
             self::$bot->onCallbackQueryData('/ads', function () {
