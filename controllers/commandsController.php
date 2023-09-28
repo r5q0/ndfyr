@@ -22,6 +22,7 @@ use SergiX44\Nutgram\Telegram\Types\Internal\Uploadable;
 use Controllers\DataBaseController;
 use SergiX44\Nutgram\Telegram\Types\Payment\PreCheckoutQuery;
 use Controllers\AdvertisementsController;
+use Controllers\ImageController;
 
 class CommandsController
 {
@@ -37,6 +38,7 @@ class CommandsController
             self::$bot->answerPreCheckoutQuery(true);
         });
         self::PaymentListener();
+        self::imageProcessing();
         self::$bot->run();
     }
     public static function DatabaseListener($text)
@@ -63,14 +65,12 @@ class CommandsController
                 $id = $bot->userId();
                 DataBaseController::setAffiliateTrue($id, $affiliate);
             }
-            
-
-            });
+        });
         self::$bot->onCommand('start', function () {
             self::DatabaseListener('/start');
             self::$bot->SendPhoto(
-                photo: InputFile::make(fopen('../dat.png', 'rb')),
-                caption: 'Welcome To our bot',
+                photo: InputFile::make(fopen('media/example1.png', 'rb')),
+                caption: 'Welcome To our bot vespid you can do this text yourself',
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(
                         InlineKeyboardButton::make('My Account', callback_data: '/me'),
@@ -98,18 +98,18 @@ class CommandsController
                         InlineKeyboardButton::make('Advertisements', callback_data: '/ads'),
                         InlineKeyboardButton::make('Affiliate', callback_data: '/affiliate')
                     )
-                );
-                                self::DatabaseListener('/freetokens');
-            });
-            self::$bot->onCallbackQueryData('/affiliate', function(){
-                $link = 't.me/ndfyr_bot?start=' . self::$bot->userId();
-                self::$bot->sendMessage("You will gain 1 token everytime somebody joins using your link.\n Your link is: $link");
-            });
-            
-            self::$bot->onCallbackQueryData('/ads', function () {
-                $clicksfly = AdvertisementsController::getLinkClicksFly(self::$bot->userId());
-                $linkvertised = AdvertisementsController::getLinkVertise(self::$bot->userId());
-                self::$bot->sendMessage(
+            );
+            self::DatabaseListener('/freetokens');
+        });
+        self::$bot->onCallbackQueryData('/affiliate', function () {
+            $link = 't.me/ndfyr_bot?start=' . self::$bot->userId();
+            self::$bot->sendMessage("You will gain 1 token everytime somebody joins using your link.\n Your link is: $link");
+        });
+
+        self::$bot->onCallbackQueryData('/ads', function () {
+            $clicksfly = AdvertisementsController::getLinkClicksFly(self::$bot->userId());
+            $linkvertised = AdvertisementsController::getLinkVertise(self::$bot->userId());
+            self::$bot->sendMessage(
                 'We offer free tokens for our users to get free tokens you need to invite your friends to our bot and you will get 1 token for each friend you invite.Or you can get tokens free of charge by watching advertisements',
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(
@@ -188,18 +188,21 @@ class CommandsController
         });
     }
 
-    public static function getFile($id)
+    public static function imageProcessing()
     {
-        $url = "https://api.telegram.org/bot" . $GLOBALS['bot']->getToken() . "/getFile?file_id=$id";
-        $rawdata = file_get_contents($url);
-        $data = json_decode($rawdata, true);
-        return $data['result']['file_path'];
-    }
 
-    public static function getPhoto($id)
-    {
-        $url = "https://api.telegram.org/file/bot" . $GLOBALS['bot']->getToken() . "/$id";
-        file_put_contents('../images/image.jpg', file_get_contents($url));
-        echo "done";
+        self::$bot->onMessageType(MessageType::PHOTO, function (Nutgram $bot) {
+            $photos = end(self::$bot->message()->photo);
+            $data = $bot->getFile($photos->file_id)?->url();
+            $img =  base64_encode( file_get_contents($data));
+            ImageController::init();
+            $mask = imageController::getMask($img);
+            $base64image = imagecontroller::getND($img, $mask);
+            $bot->sendPhoto(
+                photo: InputFile::make(base64_decode($base64image)),
+                caption: 'Here is your image'
+            );
+            DataBaseController::remTokens(self::$bot->userId(), 1);
+        });
     }
 }

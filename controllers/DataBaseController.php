@@ -86,5 +86,11 @@ class DataBaseController
         $user->premium = true;
         R::store($user);
     }
+    public static function remTokens($id, $amount)
+    {
+        $user = R::findOne('users', 'telegram = ?', [$id]);
+        $user->tokens = $user->tokens - $amount;
+        R::store($user);
+    }
     
 }
