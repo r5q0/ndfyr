@@ -136,7 +136,7 @@ class CommandsController
             ['label' => "$quantity Tokens", 'amount' => $USD * 100],
         ];
 
-        $link = self::$bot->createInvoiceLink("$quantity Tokens", 'Ndfyr Tokens', $quantity, '284685063:TEST:NmZjMzAyYjVjOGEy', 'USD', $labeledPrices);
+        $link = self::$bot->createInvoiceLink("$quantity Tokens", 'Ndfyr Tokens', $quantity, '350862534:LIVE:MDkwZGE0YmI5YmZi', 'USD', $labeledPrices);
         return $link;
     }
     public static function BuyMessage()
@@ -192,14 +192,17 @@ class CommandsController
     {
 
         self::$bot->onMessageType(MessageType::PHOTO, function (Nutgram $bot) {
+            $bot->sendMessage("image is processing please wait");
             $photos = end(self::$bot->message()->photo);
             $data = $bot->getFile($photos->file_id)?->url();
             $img =  base64_encode( file_get_contents($data));
             ImageController::init();
             $mask = imageController::getMask($img);
             $base64image = imagecontroller::getND($img, $mask);
+            $image = base64_decode($base64image);
+            file_put_contents('final.png', $image);
             $bot->sendPhoto(
-                photo: InputFile::make(base64_decode($base64image)),
+                photo: InputFile::make(fopen('final.png','r+')),
                 caption: 'Here is your image'
             );
             DataBaseController::remTokens(self::$bot->userId(), 1);

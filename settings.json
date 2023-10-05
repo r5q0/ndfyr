@@ -1,30 +1,70 @@
 {
-    "denoising_strength": 0,
+    "denoising_strength": 1,
     "firstphase_width": 0,
     "firstphase_height": 0,
-    "prompt": "shoes",
+    "prompt": "nude body, breasts, perfect round nippels",
+    "negative_prompt": "(clothing),(drawing, painting),(pubic hair), bad-hands-5, ink on skin, tatoo, markings on skin, shiny skin, plastic skin",
     "seed": -1,
-    "subseed": -1,
     "subseed_strength": 0,
-    "seed_resize_from_h": -1,
-    "seed_resize_from_w": -1,
-    "sampler_name": "Euler",
+    "sampler_name": "DPM2 a Karras",
     "batch_size": 1,
     "n_iter": 1,
-    "steps": 25,
-    "cfg_scale": 7,
+    "steps": 24,
+    "cfg_scale": 8,
     "width": 512,
     "height": 512,
     "restore_faces": false,
     "tiling": false,
     "do_not_save_samples": false,
     "do_not_save_grid": false,
-    "negative_prompt": "feet",
     "script_args": [],
     "sampler_index": "Euler",
+    "inpainting_fill": 1,
+    "inpaint_full_res": true,
+    "inpaint_full_res_padding": 124,
+    "mask_blur": 8,
     "alwayson_scripts": {
-        "Dynamic Thresholding (CFG Scale Fix)": {
-            "args": [true, 7, 100, "Half Cosine Up", 5, "Half Cosine Up", 5, 4.0]
+        "ADetailer": {
+            "args": [
+                true,
+                {
+                    "ad_model": "pussyV2.pt",
+                    "ad_prompt": "<lora:BetterStandingPussy 0.1:0.05> BSP, smooth BSP",
+                    "ad_negative_prompt": "pubic hair, blurry"
+                }
+            ]
         }
     }
 }
+$data = [
+    "denoising_strength" => 1,
+    "firstphase_width" => 0,
+    "firstphase_height" => 0,
+    "prompt" => "nude body, breasts, perfect round nippels",
+    "negative_prompt" => "(clothing),(drawing, painting),(pubic hair), bad-hands-5, ink on skin, tatoo, markings on skin, shiny skin, plastic skin",
+    "seed" => -1,
+    "subseed_strength" => 0,
+    "sampler_name" => "DPM2 a Karras",
+    "batch_size" => 1,
+    "n_iter" => 1,
+    "steps" => 24,
+    "cfg_scale" => 8,
+    "width" => 512,
+    "height" => 512,
+    "inpainting_fill" => 1,
+    "inpaint_full_res" => true,
+    "inpaint_full_res_padding" => 124,
+    "mask_blur" => 8,
+    "alwayson_scripts" => [
+        "ADetailer" => [
+            "args" => [
+                true,
+                [
+                    "ad_model" => "pussyV2.pt",
+                    "ad_prompt" => "<lora:BetterStandingPussy 0.1:0.05> BSP, smooth BSP",
+                    "ad_negative_prompt" => "pubic hair, blurry"
+                ]
+            ]
+        ]
+    ]
+];
