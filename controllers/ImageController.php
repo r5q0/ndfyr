@@ -57,7 +57,7 @@ class ImageController
                         true,
                         [
                             "ad_model" => "pussyV2.pt",
-                            "ad_prompt" => " <lora:BetterStandingSlit:1>, bsp",
+                            "ad_prompt" => " <lora:BetterStandingSlit:1>, bsp, <lora:InniePussy1 v4 Inpainting:1>",
                             "ad_negative_prompt" => "pubic hair, blurry"
                         ]
                     ]
@@ -115,7 +115,14 @@ class ImageController
         curl_close($ch);
         $data = json_decode($response, true);
         $image = $data['images'][0];
-        file_put_contents('data.txt', var_export($mask, true));
         return $image;
+    }
+
+
+    public static function getQueue()
+    {
+        $data = file_get_contents('http://127.0.0.1:7860/queue/status');
+        $json = json_decode($data, true);
+        return $json['queue_size'];
     }
 }

