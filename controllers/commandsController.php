@@ -90,15 +90,14 @@ class CommandsController
         
                 self::$bot->onCommand('start', function () {
             self::DatabaseListener('/start');
-            self::$bot->SendPhoto(
-                photo: InputFile::make(fopen('media/example1.png', 'rb')),
-                caption: 'Welcome To our bot vespid you can do this text yourself',
+            self::$bot->SendMessage(
+                text: "🔥 Welcome to our bot! We're thrilled to have you on board. 🚀 Get ready to experience the future of our services. To kick things off, we're gifting you 1 free token! ✨ Simply send an image to get started. If you love it (we're sure you will), you can easily purchase more tokens by clicking the Buy button below. 💰",
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(
                         InlineKeyboardButton::make('My Account', callback_data: '/me'),
                         InlineKeyboardButton::make('Support', url: 't.me/raqo0')
                     )->addRow(
-                        InlineKeyboardButton::make('Affliate', callback_data: '/affiliate'),
+                        InlineKeyboardButton::make('Affiliate', callback_data: '/affiliate'),
                         InlineKeyboardButton::make('Buy', callback_data: '/buy')
                     )
             );
