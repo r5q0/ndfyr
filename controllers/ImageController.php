@@ -20,11 +20,11 @@ class ImageController
             'Content-Type: application/json'
         ];
         self::$samConfig = [
-            'sam_model_name' => 'sam_hq_vit_h.pth',
+            'sam_model_name' => 'mobile_sam.pt',
             'sam_positive_points' => [],
             'sam_negative_points' => [],
             'dino_enabled' => true,
-            'dino_model_name' => 'GroundingDINO_SwinB (938MB)',
+            'dino_model_name' => 'GroundingDINO_SwinT_OGC (694MB)',
             'dino_text_prompt' => 'clothing. straps. bikini. clothes. tops. pants',
             'dino_box_threshold' => 0.3,
             'dino_preview_checkbox' => false,
@@ -36,18 +36,18 @@ class ImageController
             "denoising_strength" => 1,
             "firstphase_width" => 0,
             "firstphase_height" => 0,
-            "prompt" => "nude body, breasts, perfect round nippels",
-            "negative_prompt" => "(clothing),(drawing, painting),(pubic hair), bad-hands-5, ink on skin, tatoo, markings on skin, shiny skin, plastic skin",
+            "prompt" => "nude body, breasts, nippels",
+            "negative_prompt" => "(clothing),(drawing, painting),(pubic hair),(blurry), ink on skin, tatoo, markings on skin, shiny skin, plastic skin",
             "seed" => -1,
-            "subseed_strength" => 0,
+            "subseed_strength" => -1,
             "sampler_name" => "DPM2 a Karras",
             "batch_size" => 1,
             "n_iter" => 1,
             "steps" => 24,
-            "cfg_scale" => 8,
+            "cfg_scale" => 4,
             "width" => 512,
             "height" => 512,
-            "inpainting_fill" => 1,
+            "inpainting_fill" => 2,
             "inpaint_full_res" => true,
             "inpaint_full_res_padding" => 124,
             "mask_blur" => 8,
@@ -57,7 +57,7 @@ class ImageController
                         true,
                         [
                             "ad_model" => "pussyV2.pt",
-                            "ad_prompt" => "<lora:BetterStandingPussy 0.1:0.05> BSP, smooth BSP",
+                            "ad_prompt" => " <lora:BetterStandingSlit:1>, bsp",
                             "ad_negative_prompt" => "pubic hair, blurry"
                         ]
                     ]
@@ -77,7 +77,7 @@ class ImageController
         $response = curl_exec($ch);
         curl_close($ch);
         $data = json_decode($response, true);
-        $base64Mask = $data['masks'][0];
+        $base64Mask = $data['masks'][1];
         return $base64Mask;
     }
     public static function maskLarger($mask, $img)
@@ -85,7 +85,7 @@ class ImageController
         $settings =  json_encode(array(
               "input_image" =>  $img,
               "mask" => $mask,
-              "dilate_amount" => 20
+              "dilate_amount" => 30
           ));
         $url =   'http://127.0.0.1:7860/sam/dilate-mask';
         $ch = curl_init($url);

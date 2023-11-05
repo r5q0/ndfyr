@@ -29,7 +29,7 @@ class CommandsController
     public static $bot;
     public function __construct($token)
     {
-        self::$bot = new Nutgram('5971524781:AAF6CcvpST9I9A8G9miZD1C3hK2XNDSts4g', new Configuration(
+        self::$bot = new Nutgram($token, new Configuration(
             logger: ConsoleLogger::class
         ));
         self::CommandStart();
