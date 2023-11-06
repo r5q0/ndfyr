@@ -92,5 +92,16 @@ class DataBaseController
         $user->tokens = $user->tokens - $amount;
         R::store($user);
     }
+
+    public static function getAffiliate($id)
+    {
+        $user = R::findOne('users', 'telegram = ?', [$id]);
+        return $user->username;
+    }
+    public static function addAffiliate($id){
+        $user = R::findOne('users', 'telegram = ?', [$id]);
+        $user->affiliatecount = $user->affiliatecount + 1;
+        R::store($user);
+    }
     
 }

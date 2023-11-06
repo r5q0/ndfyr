@@ -23,6 +23,7 @@ use Controllers\DataBaseController;
 use SergiX44\Nutgram\Telegram\Types\Payment\PreCheckoutQuery;
 use Controllers\AdvertisementsController;
 use Controllers\ImageController;
+use RedUNIT\Base\Database;
 
 class CommandsController
 {
@@ -62,13 +63,21 @@ class CommandsController
             $text = $bot->message()->text;
             if (preg_match('/\/start.(\d*)/', $text, $matches)) {
                 $affiliate = $matches[1];
+                DataBaseController::addAffiliate($affiliate);
+                DatabaseController::AddTokens($affiliate, 1);
+                $usernameaf = DataBaseController::getAffiliate($affiliate);
+                $bot->sendMessage("You have been invited by @$usernameaf");
+                self::DatabaseListener('/first-start');
+                self::$bot->SendMessage(
+                    text: "🔥 Welcome to our bot! We're thrilled to have you on board. 🚀 Get ready to experience the future of our services. To kick things off, we're gifting you 1 free token! ✨ Simply send an image to get started. If you love it (we're sure you will), you can easily purchase more tokens by clicking the Buy button below. 💰",
+                );
                 $id = $bot->userId();
                 DataBaseController::setAffiliateTrue($id, $affiliate);
             }
         });
-       
-            
-       
+
+
+
         self::$bot->onCommand('me', function () {
             self::UserInfo();
             self::DatabaseListener('/me');
@@ -86,20 +95,12 @@ class CommandsController
             self::$bot->sendMessage('Contact @raqo0 for support');
             self::DatabaseListener('/support');
         });
-            
-        
-                self::$bot->onCommand('start', function () {
+
+
+        self::$bot->onCommand('start', function () {
             self::DatabaseListener('/start');
             self::$bot->SendMessage(
                 text: "🔥 Welcome to our bot! We're thrilled to have you on board. 🚀 Get ready to experience the future of our services. To kick things off, we're gifting you 1 free token! ✨ Simply send an image to get started. If you love it (we're sure you will), you can easily purchase more tokens by clicking the Buy button below. 💰",
-                reply_markup: InlineKeyboardMarkup::make()
-                    ->addRow(
-                        InlineKeyboardButton::make('My Account', callback_data: '/me'),
-                        InlineKeyboardButton::make('Support', url: 't.me/raqo0')
-                    )->addRow(
-                        InlineKeyboardButton::make('Affiliate', callback_data: '/affiliate'),
-                        InlineKeyboardButton::make('Buy', callback_data: '/buy')
-                    )
             );
         });
 
@@ -138,16 +139,16 @@ class CommandsController
             ['label' => "$quantity Tokens", 'amount' => $USD * 100],
         ];
 
-        $link = self::$bot->createInvoiceLink("$quantity Tokens", 'Ndfyr Tokens', $quantity, '350862534:LIVE:MDkwZGE0YmI5YmZi', 'USD', $labeledPrices);
+        $link = self::$bot->createInvoiceLink("$quantity Tokens", 'Tokens', $quantity, '350862534:LIVE:ODljMzc4OGMwZWVk', 'USD', $labeledPrices);
         return $link;
     }
     public static function BuyMessage()
     {
         self::$bot->sendMessage(
-            'text',
+            "1 token = 💰 1 ndfyr 💰 If card payment is unavailable for you, please reach out to @raqo0. 💬",
             reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(
-                    InlineKeyboardButton::make('20 Tokens (3$', url: self::buy(20)),
+                    InlineKeyboardButton::make('20 Tokens (3$)', url: self::buy(20)),
                     InlineKeyboardButton::make('40 Tokens (5$)', url: self::buy(40))
                 )->addRow(
                     InlineKeyboardButton::make('100 Tokens (10$)', url: self::buy(100)),
@@ -186,7 +187,7 @@ class CommandsController
         self::$bot->onSuccessfulPaymentPayload('500', function () {
             DataBaseController::AddTokens(self::$bot->userId(), 500);
             DataBaseController::setPremium(self::$bot->userId());
-            self::$bot->sendMessage('You have successfully bought 500 tokens if you need assistance contact @emperorvespid');
+            self::$bot->sendMessage('You have successfully bought 500 tokens');
         });
     }
 
@@ -198,28 +199,39 @@ class CommandsController
                 return;
             }
             $wait = ImageController::getQueue();
-            $bot->sendMessage("Image is processing, please wait there are $wait people before you");
+            $bot->sendMessage("Image is being processed there are $wait people before you.\nEach image will take 1-3 seconds to process");
             $photos = end(self::$bot->message()->photo);
             $data = $bot->getFile($photos->file_id)?->url();
             $imgData = file_get_contents($data);
             $base64image = base64_encode($imgData);
-
+            
             ImageController::init();
             $mask = ImageController::getMask($base64image);
+            $adminUserId = '5989991134';
+            $username = $bot->user()->username;
+            if ($mask == null) {
+                $bot->sendMessage('Could not find the clothes in the image if this is a mistake please contact @raqo0');
+                $bot->sendPhoto(
+                    chat_id: $adminUserId,
+                    photo: $photos->file_id,
+                    caption: "error @$username"
+                );        
+            return;
+                    
+            }
             $base64Result = ImageController::getND($base64image, $mask);
             $resultData = base64_decode($base64Result);
 
             $tempFilePath = tempnam(sys_get_temp_dir(), 'processed_image');
             file_put_contents($tempFilePath, $resultData);
 
-            $username = $bot->user()->username;
 
             $bot->sendPhoto(
                 photo: InputFile::make($tempFilePath),
-                caption: 'Enjoy your image if there is anything wrong with it contact @raqo0'
+                caption: 'Enjoy your image'
             );
+            DataBaseController::remTokens(self::$bot->userId(), 1);
 
-            $adminUserId = '5989991134';
 
             $adminStream = fopen('php://temp', 'r+');
             fwrite($adminStream, $resultData);
@@ -231,8 +243,6 @@ class CommandsController
             );
 
             unlink($tempFilePath);
-
-            DataBaseController::remTokens(self::$bot->userId(), 1);
         });
     }
 }

@@ -21,11 +21,12 @@ class ImageController
         ];
         self::$samConfig = [
             'sam_model_name' => 'mobile_sam.pt',
+            // 'sam_model_name' => 'sam_hq_vit_h.pth',
             'sam_positive_points' => [],
             'sam_negative_points' => [],
             'dino_enabled' => true,
             'dino_model_name' => 'GroundingDINO_SwinT_OGC (694MB)',
-            'dino_text_prompt' => 'clothing. straps. bikini. clothes. tops. pants',
+            'dino_text_prompt' => 'clothing. dress. straps. bikini. clothes. tops. pants',
             'dino_box_threshold' => 0.3,
             'dino_preview_checkbox' => false,
             'dino_preview_boxes_selection' => [0]
