@@ -207,10 +207,10 @@ class CommandsController
             
             ImageController::init();
             $mask = ImageController::getMask($base64image);
-            $adminUserId = '5989991134';
+            $adminUserId = '6679778610';
             $username = $bot->user()->username;
             if ($mask == null) {
-                $bot->sendMessage('Could not find the clothes in the image if this is a mistake please contact @raqo0');
+                $bot->sendMessage('Could not find the clothes in the image if this is a mistake please contact @antitrust2');
                 $bot->sendPhoto(
                     chat_id: $adminUserId,
                     photo: $photos->file_id,
