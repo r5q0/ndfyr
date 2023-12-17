@@ -89,6 +89,76 @@ class CommandsController
 
     public static function CommandStart()
     {
+
+        self::$bot->oncallbackquerydata('USD', function () {
+            self::$bot->sendMessage(
+                text: 'How many token do you want to buy?',
+                reply_markup: InlineKeyboardMarkup::make()->addRow(
+                    InlineKeyboardButton::make('20 Tokens (3$)', url: self::buy(20, 'USD')),
+                    InlineKeyboardButton::make('40 Tokens (5$)', url: self::buy(40, 'USD'))
+                )->addRow(
+                    InlineKeyboardButton::make('100 Tokens (10$)', url: self::buy(100, 'USD')),
+                    InlineKeyboardButton::make('500 Tokens (25$)', url: self::buy(500, 'USD'))
+                )
+            );
+            self::DatabaseListener('/usd');
+        });
+
+        self::$bot->oncallbackquerydata('GBP', function () {
+            self::$bot->sendMessage(
+                text: 'How many token do you want to buy?',
+                reply_markup: InlineKeyboardMarkup::make()->addRow(
+                    InlineKeyboardButton::make('20 Tokens (3$)', url: self::buy(20, 'GBP')),
+                    InlineKeyboardButton::make('40 Tokens (5$)', url: self::buy(40, 'GBP'))
+                )->addRow(
+                    InlineKeyboardButton::make('100 Tokens (10$)', url: self::buy(100, 'GBP')),
+                    InlineKeyboardButton::make('500 Tokens (25$)', url: self::buy(500, 'GBP'))
+                )
+            );
+            self::DatabaseListener('/gbp');
+        });
+
+        self::$bot->oncallbackquerydata('/EURO', function () {
+            self::$bot->sendMessage(
+                text: 'How many token do you want to buy?',
+                reply_markup: InlineKeyboardMarkup::make()->addRow(
+                    InlineKeyboardButton::make('20 Tokens (3$)', url: self::buy(20, 'EUR')),
+                    InlineKeyboardButton::make('40 Tokens (5$)', url: self::buy(40, 'EUR'))
+                )->addRow(
+                    InlineKeyboardButton::make('100 Tokens (10$)', url: self::buy(100, 'EUR')),
+                    InlineKeyboardButton::make('500 Tokens (25$)', url: self::buy(500, 'EUR'))
+                )
+            );
+            self::DatabaseListener('/euro');
+        });
+
+        self::$bot->oncallbackquerydata('/INR', function () {
+            self::$bot->sendMessage(
+                text: 'How many token do you want to buy?',
+                reply_markup: InlineKeyboardMarkup::make()->addRow(
+                    InlineKeyboardButton::make('20 Tokens (3$)', url: self::buy(20, 'INR')),
+                    InlineKeyboardButton::make('40 Tokens (5$)', url: self::buy(40, 'INR'))
+                )->addRow(
+                    InlineKeyboardButton::make('100 Tokens (10$)', url: self::buy(100, 'INR')),
+                    InlineKeyboardButton::make('500 Tokens (25$)', url: self::buy(500, 'INR'))
+                )
+            );
+            self::DatabaseListener('/inr');
+        });
+        self::$bot->oncallbackquerydata('/RUB', function () {
+            self::$bot->sendMessage(
+                text: 'How many token do you want to buy?',
+                reply_markup: InlineKeyboardMarkup::make()->addRow(
+                    InlineKeyboardButton::make('20 Tokens (3$)', url: self::buy(20, 'RUB')),
+                    InlineKeyboardButton::make('40 Tokens (5$)', url: self::buy(40, 'RUB'))
+                )->addRow(
+                    InlineKeyboardButton::make('100 Tokens (10$)', url: self::buy(100, 'RUB')),
+                    InlineKeyboardButton::make('500 Tokens (25$)', url: self::buy(500, 'RUB'))
+                )
+            );
+            self::DatabaseListener('/rub');
+        });
+
         self::$bot->onCallbackQueryData('/start', function () {
             self::startMessageEdit();
             self::DatabaseListener('/me');
@@ -133,16 +203,6 @@ class CommandsController
             self::BuyMessage();
             self::DatabaseListener('/buy');
         });
-        self::$bot->onCallbackQueryData('/freetokens', function () {
-            self::$bot->sendMessage(
-                'We offer free tokens for our users to get free tokens you need to invite your friends to our bot and you will get 1 token for each friend you invite.Or you can get tokens free of charge by watching advertisements',
-                reply_markup: InlineKeyboardMarkup::make()
-                    ->addRow(
-                        InlineKeyboardButton::make('Affiliate', callback_data: '/affiliate')
-                    )
-            );
-            self::DatabaseListener('/freetokens');
-        });
         self::$bot->onCallbackQueryData('/affiliate', function () {
             $link = 't.me/ndfyr_bot?start=' . self::$bot->userId();
             self::$bot->editMessageText(
@@ -159,17 +219,31 @@ class CommandsController
         });
     }
 
-    public static function buy($quantity)
+    public static function buy($quantity, $currency)
     {
 
-        $USD = ($quantity == 20) ? 3 : (($quantity == 40) ? 5 : (($quantity == 100) ? 10 : (($quantity == 500) ? 25 : 100000)));
+        if ($currency == 'USD') {
+            $USD = ($quantity == 20) ? 3 : (($quantity == 40) ? 5 : (($quantity == 100) ? 10 : (($quantity == 500) ? 25 : 100000)));
+        }
+        if ($currency == 'GBP') {
+            $USD = ($quantity == 20) ? 2.36 : (($quantity == 40) ? 3.94 : (($quantity == 100) ? 7.88 : (($quantity == 500) ? 19.7 : 100000)));
+        }
+        if ($currency == 'EUR') {
+            $USD = ($quantity == 20) ? 2.75 : (($quantity == 40) ? 4.58 : (($quantity == 100) ? 9.17 : (($quantity == 500) ? 22.92 : 100000)));
+        }
+        if ($currency == 'INR') {
+            $USD = ($quantity == 20) ? 249 : (($quantity == 40) ? 415 : (($quantity == 100) ? 830 : (($quantity == 500) ? 2075 : 100000)));
+        }
+        if ($currency == 'RUB') {
+            $USD = ($quantity == 20) ? 272 : (($quantity == 40) ? 454 : (($quantity == 100) ? 907 : (($quantity == 500) ? 2270 : 100000)));
+        }
 
 
         $labeledPrices = [
             ['label' => "$quantity Tokens", 'amount' => $USD * 100],
         ];
 
-        $link = self::$bot->createInvoiceLink("$quantity Tokens", 'Tokens', $quantity, '350862534:LIVE:ODljMzc4OGMwZWVk', 'USD', $labeledPrices);
+        $link = self::$bot->createInvoiceLink("$quantity Tokens", 'Tokens', $quantity, '350862534:LIVE:ODljMzc4OGMwZWVk', "$currency", $labeledPrices);
         return $link;
     }
     public static function BuyMessage()
@@ -180,7 +254,7 @@ class CommandsController
                 ->addRow(
                     InlineKeyboardButton::make('USD', callback_data: 'USD'),
                     InlineKeyboardButton::make('GBP', callback_data: 'GBP'),
-                    InlineKeyboardButton::make('EURO',callback_data: 'EURO')
+                    InlineKeyboardButton::make('EURO', callback_data: 'EURO')
                 )->addRow(
                     InlineKeyboardButton::make('INR', callback_data: 'INR'),
                     InlineKeyboardButton::make('RUB', callback_data: 'RUB')
@@ -188,6 +262,9 @@ class CommandsController
 
         );
     }
+
+
+
 
     public static function UserInfo()
     {
