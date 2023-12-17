@@ -16,12 +16,11 @@ class ImageController
         self::$samEndpoint = 'http://127.0.0.1:7860/sam/sam-predict';
         self::$i2iEndpoint = 'http://127.0.0.1:7860/sdapi/v1/img2img';
         self::$headers = [
-            'Accept: application/json',
+            'Accept: application/json', 
             'Content-Type: application/json'
         ];
         self::$samConfig = [
-            'sam_model_name' => 'mobile_sam.pt',
-            // 'sam_model_name' => 'sam_hq_vit_h.pth',
+            'sam_model_name' => 'sam_hq_vit_h.pth',
             'sam_positive_points' => [],
             'sam_negative_points' => [],
             'dino_enabled' => true,
