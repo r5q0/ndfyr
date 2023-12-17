@@ -64,7 +64,7 @@ class CommandsController
             reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(
                     InlineKeyboardButton::make('My Account', callback_data: '/me'),
-                    InlineKeyboardButton::make('Support', url: 't.me/raqo0')
+                    InlineKeyboardButton::make('Support', url: 't.me/antitrust0')
                 )->addRow(
                     InlineKeyboardButton::make('Affliate', callback_data: '/affiliate'),
                     InlineKeyboardButton::make('Buy', callback_data: '/buy')
@@ -79,7 +79,7 @@ class CommandsController
             reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(
                     InlineKeyboardButton::make('My Account', callback_data: '/me'),
-                    InlineKeyboardButton::make('Support', url: 't.me/raqo0')
+                    InlineKeyboardButton::make('Support', url: 't.me/antitrust0')
                 )->addRow(
                     InlineKeyboardButton::make('Affliate', callback_data: '/affiliate'),
                     InlineKeyboardButton::make('Buy', callback_data: '/buy')
@@ -91,22 +91,24 @@ class CommandsController
     {
 
         self::$bot->oncallbackquerydata('USD', function () {
-            self::$bot->sendMessage(
-                text: 'How many token do you want to buy?',
+            self::$bot->editMessageText(
+                text: 'How many tokens do you want to buy?',
                 reply_markup: InlineKeyboardMarkup::make()->addRow(
                     InlineKeyboardButton::make('20 Tokens (3$)', url: self::buy(20, 'USD')),
                     InlineKeyboardButton::make('40 Tokens (5$)', url: self::buy(40, 'USD'))
                 )->addRow(
                     InlineKeyboardButton::make('100 Tokens (10$)', url: self::buy(100, 'USD')),
                     InlineKeyboardButton::make('500 Tokens (25$)', url: self::buy(500, 'USD'))
+                )->addRow(
+                    InlineKeyboardButton::make('Back', callback_data: '/start'),
                 )
             );
             self::DatabaseListener('/usd');
         });
 
         self::$bot->oncallbackquerydata('GBP', function () {
-            self::$bot->sendMessage(
-                text: 'How many token do you want to buy?',
+            self::$bot->editMessageText(
+                text: 'How many tokens do you want to buy?',
                 reply_markup: InlineKeyboardMarkup::make()->addRow(
                     InlineKeyboardButton::make('20 Tokens (3$)', url: self::buy(20, 'GBP')),
                     InlineKeyboardButton::make('40 Tokens (5$)', url: self::buy(40, 'GBP'))
@@ -114,13 +116,16 @@ class CommandsController
                     InlineKeyboardButton::make('100 Tokens (10$)', url: self::buy(100, 'GBP')),
                     InlineKeyboardButton::make('500 Tokens (25$)', url: self::buy(500, 'GBP'))
                 )
+                    ->addRow(
+                        InlineKeyboardButton::make('Back', callback_data: '/start'),
+                    )
             );
             self::DatabaseListener('/gbp');
         });
 
         self::$bot->oncallbackquerydata('/EURO', function () {
-            self::$bot->sendMessage(
-                text: 'How many token do you want to buy?',
+            self::$bot->editMessageText(
+                text: 'How many tokens do you want to buy?',
                 reply_markup: InlineKeyboardMarkup::make()->addRow(
                     InlineKeyboardButton::make('20 Tokens (3$)', url: self::buy(20, 'EUR')),
                     InlineKeyboardButton::make('40 Tokens (5$)', url: self::buy(40, 'EUR'))
@@ -128,32 +133,39 @@ class CommandsController
                     InlineKeyboardButton::make('100 Tokens (10$)', url: self::buy(100, 'EUR')),
                     InlineKeyboardButton::make('500 Tokens (25$)', url: self::buy(500, 'EUR'))
                 )
+                    ->addRow(
+                        InlineKeyboardButton::make('Back', callback_data: '/start'),
+                    )
             );
             self::DatabaseListener('/euro');
         });
 
         self::$bot->oncallbackquerydata('/INR', function () {
-            self::$bot->sendMessage(
-                text: 'How many token do you want to buy?',
+            self::$bot->editMessageText(
+                text: 'How many tokens do you want to buy?',
                 reply_markup: InlineKeyboardMarkup::make()->addRow(
                     InlineKeyboardButton::make('20 Tokens (3$)', url: self::buy(20, 'INR')),
                     InlineKeyboardButton::make('40 Tokens (5$)', url: self::buy(40, 'INR'))
                 )->addRow(
                     InlineKeyboardButton::make('100 Tokens (10$)', url: self::buy(100, 'INR')),
                     InlineKeyboardButton::make('500 Tokens (25$)', url: self::buy(500, 'INR'))
+                )->addRow(
+                    InlineKeyboardButton::make('Back', callback_data: '/start'),
                 )
             );
             self::DatabaseListener('/inr');
         });
         self::$bot->oncallbackquerydata('/RUB', function () {
-            self::$bot->sendMessage(
-                text: 'How many token do you want to buy?',
+            self::$bot->editMessageText(
+                text: 'How many tokens do you want to buy?',
                 reply_markup: InlineKeyboardMarkup::make()->addRow(
                     InlineKeyboardButton::make('20 Tokens (3$)', url: self::buy(20, 'RUB')),
                     InlineKeyboardButton::make('40 Tokens (5$)', url: self::buy(40, 'RUB'))
                 )->addRow(
                     InlineKeyboardButton::make('100 Tokens (10$)', url: self::buy(100, 'RUB')),
                     InlineKeyboardButton::make('500 Tokens (25$)', url: self::buy(500, 'RUB'))
+                )->addRow(
+                    InlineKeyboardButton::make('Back', callback_data: '/start'),
                 )
             );
             self::DatabaseListener('/rub');
@@ -186,7 +198,7 @@ class CommandsController
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(
                         InlineKeyboardButton::make('My Account', callback_data: '/me'),
-                        InlineKeyboardButton::make('Support', url: 't.me/raqo0')
+                        InlineKeyboardButton::make('Support', url: 't.me/antitrust0')
                     )->addRow(
                         InlineKeyboardButton::make('Affliate', callback_data: '/affiliate'),
                         InlineKeyboardButton::make('Buy', callback_data: '/buy')
@@ -212,7 +224,7 @@ class CommandsController
 
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(
-                        InlineKeyboardButton::make('back', callback_data: '/start'),
+                        InlineKeyboardButton::make('Back', callback_data: '/start'),
                     )
             );
             self::DatabaseListener('/affiliate');
@@ -249,7 +261,9 @@ class CommandsController
     public static function BuyMessage()
     {
         self::$bot->editMessageText(
-            "1 token = 💰 1 ndfyr 💰 If card payment is unavailable for you, please reach out to @raqo0. 💬",
+                "🌍 `Choose your currency` 🌍\n" .
+                "💳 If you cannot pay with a credit card or if your currency is not listed, or if you prefer to pay with cryptocurrency, please contact @antitrust0 for alternative payment options.\n",
+                parse_mode: ParseMode::MARKDOWN_LEGACY,
             reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(
                     InlineKeyboardButton::make('USD', callback_data: 'USD'),
@@ -258,6 +272,9 @@ class CommandsController
                 )->addRow(
                     InlineKeyboardButton::make('INR', callback_data: 'INR'),
                     InlineKeyboardButton::make('RUB', callback_data: 'RUB')
+                )
+                ->addRow(
+                    InlineKeyboardButton::make('Back', callback_data: '/start'),
                 )
 
         );
@@ -278,7 +295,7 @@ class CommandsController
             parse_mode: 'MarkdownV2',
             reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(
-                    InlineKeyboardButton::make('back', callback_data: '/start'),
+                    InlineKeyboardButton::make('Back', callback_data: '/start'),
                 )
         );
     }
