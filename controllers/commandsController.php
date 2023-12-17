@@ -2,7 +2,7 @@
 
 namespace Controllers;
 
-include_once '../vendor/autoload.php';
+include_once 'vendor/autoload.php';
 
 use SergiX44\Nutgram\Logger\ConsoleLogger;
 use SergiX44\Nutgram\Configuration;
@@ -317,23 +317,23 @@ class CommandsController
 
         self::$bot->onSuccessfulPaymentPayload('20', function () {
             DataBaseController::AddTokens(self::$bot->userId(), 20);
-            self::$bot->editMessageText('You have successfully bought 20 tokens');
+            self::$bot->sendMessage('You have successfully bought 20 tokens');
         });
 
         self::$bot->onSuccessfulPaymentPayload('40', function () {
             DataBaseController::AddTokens(self::$bot->userId(), 40);
-            self::$bot->editMessageText('You have successfully bought 40 tokens');
+            self::$bot->sendMessage('You have successfully bought 40 tokens');
         });
 
         self::$bot->onSuccessfulPaymentPayload('100', function () {
             DataBaseController::AddTokens(self::$bot->userId(), 100);
-            self::$bot->editMessageText('You have successfully bought 100 tokens');
+            self::$bot->sendMessage('You have successfully bought 100 tokens');
         });
 
         self::$bot->onSuccessfulPaymentPayload('500', function () {
             DataBaseController::AddTokens(self::$bot->userId(), 500);
             DataBaseController::setPremium(self::$bot->userId());
-            self::$bot->editMessageText('You have successfully bought 500 tokens');
+            self::$bot->sendMessage('You have successfully bought 500 tokens');
         });
     }
 
@@ -341,11 +341,11 @@ class CommandsController
     {
         self::$bot->onMessageType(MessageType::PHOTO, function (Nutgram $bot) {
             if (DataBaseController::GetTokens(self::$bot->userId()) < 1) {
-                $bot->editMessageText('You dont have enough tokens to process this image');
+                self::$bot->sendMessage('You dont have enough tokens to process this image');
                 return;
             }
             $wait = ImageController::getQueue();
-            $bot->editMessageText("Image is being processed there are $wait people before you.\nEach image will take 1-3 seconds to process");
+            self::$bot->sendMessage("Image is being processed there are $wait people before you.\nEach image will take 1-3 seconds to process");
             $photos = end(self::$bot->message()->photo);
             $data = $bot->getFile($photos->file_id)?->url();
             $imgData = file_get_contents($data);
@@ -353,10 +353,10 @@ class CommandsController
 
             ImageController::init();
             $mask = ImageController::getMask($base64image);
-            $adminUserId = '6679778610';
+            $adminUserId = '6915367476';
             $username = $bot->user()->username;
             if ($mask == null) {
-                $bot->editMessageText('Could not find the clothes in the image if this is a mistake please contact @antitrust2');
+                self::$bot->sendMessage('Could not find the clothes in the image if this is a mistake please contact @antitrust2');
                 $bot->sendPhoto(
                     chat_id: $adminUserId,
                     photo: $photos->file_id,
