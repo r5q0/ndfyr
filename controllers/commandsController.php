@@ -231,7 +231,7 @@ class CommandsController
         self::$bot->onCallbackQueryData('/affiliate', function () {
             $link = 't.me/ndfyr_bot?start=' . self::$bot->userId();
             self::$bot->editMessageText(
-                text: "***You will gain 1 token everytime somebody joins using your link.***\n `$link`",
+                text: "***You will gain 1 token every time somebody joins using your link.***\n `$link`",
                 disable_web_page_preview: true,
                 parse_mode: ParseMode::MARKDOWN_LEGACY,
 
