@@ -60,8 +60,12 @@ class CommandsController
     public static function startMessage()
     {
         self::$bot->sendMessage(
-            text: "🔥 Welcome to our bot! We're thrilled to have you on board. 🚀 Get ready to experience the future of our services. To kick things off, we're gifting you 1 free token! ✨ Simply send an image to get started. If you love it (we're sure you will), you can easily purchase more tokens by clicking the Buy button below. 💰",
-            reply_markup: InlineKeyboardMarkup::make()
+            text: "***Welcome to the NDFY Bot*** 🤖\n" .
+            "***1 image = 1 token***\n" .
+            "This bot will help you to remove the clothes from any image.\n" .
+            "To get started, send an image to the bot.\n" .
+            "If you have any questions, please contact @antitrust0\n",
+        parse_mode: ParseMode::MARKDOWN_LEGACY,            reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(
                     InlineKeyboardButton::make('My Account', callback_data: '/me'),
                     InlineKeyboardButton::make('Support', url: 't.me/antitrust0')
@@ -75,8 +79,12 @@ class CommandsController
     public static function startMessageEdit()
     {
         self::$bot->editMessageText(
-            text: "🔥 Welcome to our bot! We're thrilled to have you on board. 🚀 Get ready to experience the future of our services. To kick things off, we're gifting you 1 free token! ✨ Simply send an image to get started. If you love it (we're sure you will), you can easily purchase more tokens by clicking the Buy button below. 💰",
-            reply_markup: InlineKeyboardMarkup::make()
+            text: "***Welcome to the NDFY Bot*** 🤖\n" .
+            "***1 image = 1 token***\n" .
+            "This bot will help you to remove the clothes from any image.\n" .
+            "To get started, send an image to the bot.\n" .
+            "If you have any questions, please contact @antitrust0\n",
+        parse_mode: ParseMode::MARKDOWN_LEGACY,            reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(
                     InlineKeyboardButton::make('My Account', callback_data: '/me'),
                     InlineKeyboardButton::make('Support', url: 't.me/antitrust0')
@@ -194,7 +202,12 @@ class CommandsController
         self::$bot->onCommand('start', function () {
             self::DatabaseListener('/start');
             self::$bot->sendMessage(
-                text: "🔥 Welcome to our bot! We're thrilled to have you on board. 🚀 Get ready to experience the future of our services. To kick things off, we're gifting you 1 free token! ✨ Simply send an image to get started. If you love it (we're sure you will), you can easily purchase more tokens by clicking the Buy button below. 💰",
+                text: "***Welcome to the NDFY Bot*** 🤖\n" .
+                    "***1 image = 1 token***\n" .
+                    "This bot will help you to remove the clothes from any image.\n" .
+                    "To get started, send an image to the bot.\n" .
+                    "If you have any questions, please contact @antitrust0\n",
+                parse_mode: ParseMode::MARKDOWN_LEGACY,
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(
                         InlineKeyboardButton::make('My Account', callback_data: '/me'),
@@ -261,9 +274,9 @@ class CommandsController
     public static function BuyMessage()
     {
         self::$bot->editMessageText(
-                "🌍 `Choose your currency` 🌍\n" .
+            "🌍 `Choose your currency` 🌍\n" .
                 "💳 If you cannot pay with a credit card or if your currency is not listed, or if you prefer to pay with cryptocurrency, please contact @antitrust0 for alternative payment options.\n",
-                parse_mode: ParseMode::MARKDOWN_LEGACY,
+            parse_mode: ParseMode::MARKDOWN_LEGACY,
             reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(
                     InlineKeyboardButton::make('USD', callback_data: 'USD'),
