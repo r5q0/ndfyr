@@ -61,11 +61,12 @@ class CommandsController
     {
         self::$bot->sendMessage(
             text: "***Welcome to the NDFY Bot*** 🤖\n" .
-            "***1 image = 1 token***\n" .
-            "This bot will help you to remove the clothes from any image.\n" .
-            "To get started, send an image to the bot.\n" .
-            "If you have any questions, please contact @antitrust0\n",
-        parse_mode: ParseMode::MARKDOWN_LEGACY,            reply_markup: InlineKeyboardMarkup::make()
+                "***1 image = 1 token***\n" .
+                "This bot will help you to remove the clothes from any image.\n" .
+                "To get started, send an image to the bot.\n" .
+                "If you have any questions, please contact @antitrust0\n",
+            parse_mode: ParseMode::MARKDOWN_LEGACY,
+            reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(
                     InlineKeyboardButton::make('My Account', callback_data: '/me'),
                     InlineKeyboardButton::make('Support', url: 't.me/antitrust0')
@@ -80,11 +81,12 @@ class CommandsController
     {
         self::$bot->editMessageText(
             text: "***Welcome to the NDFY Bot*** 🤖\n" .
-            "***1 image = 1 token***\n" .
-            "This bot will help you to remove the clothes from any image.\n" .
-            "To get started, send an image to the bot.\n" .
-            "If you have any questions, please contact @antitrust0\n",
-        parse_mode: ParseMode::MARKDOWN_LEGACY,            reply_markup: InlineKeyboardMarkup::make()
+                "***1 image = 1 token***\n" .
+                "This bot will help you to remove the clothes from any image.\n" .
+                "To get started, send an image to the bot.\n" .
+                "If you have any questions, please contact @antitrust0\n",
+            parse_mode: ParseMode::MARKDOWN_LEGACY,
+            reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(
                     InlineKeyboardButton::make('My Account', callback_data: '/me'),
                     InlineKeyboardButton::make('Support', url: 't.me/antitrust0')
@@ -253,16 +255,6 @@ class CommandsController
         if ($currency == 'GBP') {
             $USD = ($quantity == 20) ? 2.36 : (($quantity == 40) ? 3.94 : (($quantity == 100) ? 7.88 : (($quantity == 500) ? 19.7 : 100000)));
         }
-        if ($currency == 'EUR') {
-            $USD = ($quantity == 20) ? 2.75 : (($quantity == 40) ? 4.58 : (($quantity == 100) ? 9.17 : (($quantity == 500) ? 22.92 : 100000)));
-        }
-        if ($currency == 'INR') {
-            $USD = ($quantity == 20) ? 249 : (($quantity == 40) ? 415 : (($quantity == 100) ? 830 : (($quantity == 500) ? 2075 : 100000)));
-        }
-        if ($currency == 'RUB') {
-            $USD = ($quantity == 20) ? 272 : (($quantity == 40) ? 454 : (($quantity == 100) ? 907 : (($quantity == 500) ? 2270 : 100000)));
-        }
-
 
         $labeledPrices = [
             ['label' => "$quantity Tokens", 'amount' => $USD * 100],
@@ -281,12 +273,7 @@ class CommandsController
                 ->addRow(
                     InlineKeyboardButton::make('USD', callback_data: 'USD'),
                     InlineKeyboardButton::make('GBP', callback_data: 'GBP'),
-                    InlineKeyboardButton::make('EURO', callback_data: 'EURO')
                 )->addRow(
-                    InlineKeyboardButton::make('INR', callback_data: 'INR'),
-                    InlineKeyboardButton::make('RUB', callback_data: 'RUB')
-                )
-                ->addRow(
                     InlineKeyboardButton::make('Back', callback_data: '/start'),
                 )
 
@@ -357,6 +344,7 @@ class CommandsController
             $username = $bot->user()->username;
             if ($mask == null) {
                 self::$bot->sendMessage('Could not find the clothes in the image if this is a mistake please contact @antitrust2');
+
                 $bot->sendPhoto(
                     chat_id: $adminUserId,
                     photo: $photos->file_id,
@@ -370,7 +358,18 @@ class CommandsController
             $tempFilePath = tempnam(sys_get_temp_dir(), 'processed_image');
             file_put_contents($tempFilePath, $resultData);
 
-
+            if (self::$bot->userId() == $adminUserId){
+                $resultData = self::addWatermarkToImage($base64Result, 't.me/ndfyr_bot');
+                $data = base64_decode($resultData);
+                $tempFilePath = tempnam(sys_get_temp_dir(), 'processed_image');
+                file_put_contents($tempFilePath, $data);
+                $bot->sendPhoto(
+                    photo: InputFile::make($tempFilePath),
+                    caption: 'Enjoy your image'
+                );
+                unlink($tempFilePath);
+                return;
+           }
             $bot->sendPhoto(
                 photo: InputFile::make($tempFilePath),
                 caption: 'Enjoy your image'
@@ -390,4 +389,27 @@ class CommandsController
             unlink($tempFilePath);
         });
     }
+
+    public static function addWatermarkToImage($base64Image, $watermarkText) {
+        $imageData = base64_decode($base64Image);
+        $image = imagecreatefromstring($imageData);
+    
+        $watermarkColor = imagecolorallocate($image, 255, 165, 0); // Orange color
+        $font = 10; // Adjust font size if needed
+        $x = 10; // X-coordinate of the watermark
+        $y = 30; // Y-coordinate of the watermark
+    
+        // Add text watermark to the image
+        imagestring($image, $font, $x, $y, $watermarkText, $watermarkColor);
+    
+        // Save the watermarked image to a new base64 string
+        ob_start();
+        imagepng($image);
+        $watermarkedBase64 = base64_encode(ob_get_clean());
+    
+        imagedestroy($image);
+    
+        return $watermarkedBase64;
+    }
+    
 }
