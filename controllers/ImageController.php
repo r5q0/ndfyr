@@ -122,14 +122,14 @@ class ImageController
     {
 
 
-        // $opt = ['sd_model_checkpoint' => 'epicphotogasm_v4-inpainting.safetensors'];
-        // $post_data = json_encode($opt);
+        $opt = ['sd_model_checkpoint' => 'epicphotogasm_v4-inpainting.safetensors'];
+        $post_data = json_encode($opt);
 
-        // $ch = curl_init('http://127.0.0.1:7860/sdapi/v1/options');
-        // curl_setopt($ch, CURLOPT_POST, 1);
-        // curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
-        // curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        // curl_exec($ch);
-        // curl_close($ch);
+        $ch = curl_init('http://127.0.0.1:7860/sdapi/v1/options');
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_exec($ch);
+        curl_close($ch);
     }
 }
