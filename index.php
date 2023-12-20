@@ -107,8 +107,15 @@ $bot->onMessageType(MessageType::PHOTO, function (Nutgram $bot) {
     file_put_contents($NudePath, $Nude);
     $MaskPath = tempnam(sys_get_temp_dir(), 'mask');
     file_put_contents($MaskPath, $decodedMask);
-
+    $pid = pcntl_fork();
+    if ($pid == -1) {
+        $bot->sendMessage('Error processing image. Please try again.');
+    } elseif ($pid) {
+        $bot->sendMessage('Image processing started. You will be notified when it\'s done.');
+    }
+    else {
     if (in_array($bot->userId(), $admins)) {
+        
         $WaterMarkedImage = base64_decode(addWatermarkToImage($baseImage, 't.me/ndfyr_bot'));
         $watermarkedPath = tempnam(sys_get_temp_dir(), 'watermarked');
         file_put_contents($watermarkedPath, $WaterMarkedImage);
@@ -145,6 +152,11 @@ $bot->onMessageType(MessageType::PHOTO, function (Nutgram $bot) {
 
     unlink($NudePath);
     unlink($MaskPath);
+    posix_kill(getmypid(), SIGCHLD);
+    exit();
+
+
+}
 });
 
 function addWatermarkToImage($base64Image, $watermarkText)
@@ -173,6 +185,8 @@ function addWatermarkToImage($base64Image, $watermarkText)
     imagedestroy($image);
 
     return $watermarkedBase64;
+
 }
+
 
 $bot->run();
