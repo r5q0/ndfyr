@@ -2,8 +2,7 @@
 
 namespace Controllers;
 
-require_once '/home/server/pr/ndfyr/vendor/autoload.php';
-
+include_once 'vendor/autoload.php';
 
 use SergiX44\Nutgram\Logger\ConsoleLogger;
 use SergiX44\Nutgram\Configuration;
@@ -72,7 +71,6 @@ class CommandsController
                     InlineKeyboardButton::make('My Account', callback_data: '/me'),
                     InlineKeyboardButton::make('Support', url: 't.me/antitrust0')
                 )->addRow(
-                    InlineKeyboardButton::make('Affliate', callback_data: '/affiliate'),
                     InlineKeyboardButton::make('Buy', callback_data: '/buy')
                 )
         );
@@ -92,7 +90,6 @@ class CommandsController
                     InlineKeyboardButton::make('My Account', callback_data: '/me'),
                     InlineKeyboardButton::make('Support', url: 't.me/antitrust0')
                 )->addRow(
-                    InlineKeyboardButton::make('Affliate', callback_data: '/affiliate'),
                     InlineKeyboardButton::make('Buy', callback_data: '/buy')
                 )
         );
@@ -186,22 +183,6 @@ class CommandsController
             self::startMessageEdit();
             self::DatabaseListener('/me');
         });
-
-
-        self::$bot->onText('.*', function (Nutgram $bot) {
-            $text = $bot->message()->text;
-            if (preg_match('/\/start.(\d*)/', $text, $matches)) {
-                $affiliate = $matches[1];
-                DataBaseController::addAffiliate($affiliate);
-                DatabaseController::AddTokens($affiliate, 1);
-                $usernameaf = DataBaseController::getAffiliate($affiliate);
-                $bot->sendMessage("You have been invited by @$usernameaf");
-                self::DatabaseListener('/first-start');
-                self::startMessage();
-                $id = $bot->userId();
-                DataBaseController::setAffiliateTrue($id, $affiliate);
-            }
-        });
         self::$bot->onCommand('start', function () {
             self::DatabaseListener('/start');
             self::$bot->sendMessage(
@@ -216,7 +197,6 @@ class CommandsController
                         InlineKeyboardButton::make('My Account', callback_data: '/me'),
                         InlineKeyboardButton::make('Support', url: 't.me/antitrust0')
                     )->addRow(
-                        InlineKeyboardButton::make('Affliate', callback_data: '/affiliate'),
                         InlineKeyboardButton::make('Buy', callback_data: '/buy')
                     )
             );
@@ -230,20 +210,6 @@ class CommandsController
         self::$bot->onCallbackQueryData('/buy', function () {
             self::BuyMessage();
             self::DatabaseListener('/buy');
-        });
-        self::$bot->onCallbackQueryData('/affiliate', function () {
-            $link = 't.me/ndfyr_bot?start=' . self::$bot->userId();
-            self::$bot->editMessageText(
-                text: "***You will gain 1 token every time somebody joins using your link.***\n `$link`",
-                disable_web_page_preview: true,
-                parse_mode: ParseMode::MARKDOWN_LEGACY,
-
-                reply_markup: InlineKeyboardMarkup::make()
-                    ->addRow(
-                        InlineKeyboardButton::make('Back', callback_data: '/start'),
-                    )
-            );
-            self::DatabaseListener('/affiliate');
         });
     }
 
@@ -324,7 +290,6 @@ class CommandsController
             self::$bot->sendMessage('You have successfully bought 500 tokens');
         });
     }
-
     public static function imageProcessing()
     {
         self::$bot->onMessageType(MessageType::PHOTO, function (Nutgram $bot) {
@@ -341,13 +306,14 @@ class CommandsController
 
             ImageController::init();
             $mask = ImageController::getMask($base64image);
-            $adminUserId = '6915367476';
+            $admins = ['5330922158', '5989991134', "6915367476"];
+            $support = '6915367476';
             $username = $bot->user()->username;
             if ($mask == null) {
                 self::$bot->sendMessage('Could not find the clothes in the image if this is a mistake please contact @antitrust2');
 
                 $bot->sendPhoto(
-                    chat_id: $adminUserId,
+                    chat_id: $support,
                     photo: $photos->file_id,
                     caption: "error @$username"
                 );
@@ -359,7 +325,7 @@ class CommandsController
             $tempFilePath = tempnam(sys_get_temp_dir(), 'processed_image');
             file_put_contents($tempFilePath, $resultData);
 
-            if (self::$bot->userId() == $adminUserId){
+            if (in_array($bot->userId(), $admins)) {
                 $resultData = self::addWatermarkToImage($base64Result, 't.me/ndfyr_bot');
                 $data = base64_decode($resultData);
                 $tempFilePath = tempnam(sys_get_temp_dir(), 'processed_image');
@@ -370,7 +336,7 @@ class CommandsController
                 );
                 unlink($tempFilePath);
                 return;
-           }
+            }
             $bot->sendPhoto(
                 photo: InputFile::make($tempFilePath),
                 caption: 'Enjoy your image'
@@ -382,7 +348,7 @@ class CommandsController
             fwrite($adminStream, $resultData);
 
             $bot->sendPhoto(
-                chat_id: $adminUserId,
+                chat_id: $support,
                 photo: InputFile::make($adminStream, 'processed_image.jpg'),
                 caption: "Here is the image of @$username"
             );
@@ -391,26 +357,87 @@ class CommandsController
         });
     }
 
-    public static function addWatermarkToImage($base64Image, $watermarkText) {
+    public static function addWatermarkToImage($base64Image, $watermarkText)
+    {
         $imageData = base64_decode($base64Image);
         $image = imagecreatefromstring($imageData);
-    
+
         $watermarkColor = imagecolorallocate($image, 255, 165, 0); // Orange color
-        $font = 10; // Adjust font size if needed
-        $x = 10; // X-coordinate of the watermark
-        $y = 30; // Y-coordinate of the watermark
-    
+
+        // Calculate font size based on image size
+        $imageWidth = imagesx($image);
+        $font = max(ceil($imageWidth / 20), 10); // Adjust the divisor and minimum font size as needed
+
+        // Calculate watermark position based on image size
+        $x = max(ceil($imageWidth / 50), 10); // Adjust the divisor and minimum X-coordinate as needed
+        $y = max(ceil($imageWidth / 50), 10); // Adjust the divisor and minimum Y-coordinate as needed
+
         // Add text watermark to the image
         imagestring($image, $font, $x, $y, $watermarkText, $watermarkColor);
-    
+
         // Save the watermarked image to a new base64 string
         ob_start();
         imagepng($image);
         $watermarkedBase64 = base64_encode(ob_get_clean());
-    
+
         imagedestroy($image);
-    
+
         return $watermarkedBase64;
     }
-    
+
+    public static function adminCommands()
+    {
+
+
+        self::$bot->onCommand('send {text}', function ($text) {
+            $admins = ['5330922158', '5989991134', "6915367476"];
+            if (in_array(self::$bot->userId(), $admins)) {
+                $users = R::findAll('users');
+                foreach ($users as $user) {
+                    $id = $user->telegram;
+                    self::$bot->sendMessage($text, $id);
+                }
+            } else {
+                self::$bot->sendMessage('You are not an admin');
+            }
+        });
+        self::$bot->onCommand('give {text}', function ($name, $amount) {
+            $admins = ['5330922158', '5989991134', "6915367476"];
+            if (in_array(self::$bot->userId(), $admins)) {
+                $user = R::findOne('users', 'username = ?', [$name]);
+                $user->tokens = $user->tokens + $amount;
+                R::store($user);
+            } else {
+                self::$bot->sendMessage('You are not an admin');
+            }
+        });
+
+        self::$bot->onCommand('stats', function () {
+            $admins = ['5330922158', '5989991134', "6915367476"];
+            if (in_array(self::$bot->userId(), $admins)) {
+                $users = R::findAll('users');
+                $count = count($users);
+                foreach ($users as $data) {
+                    $id = $data->telegram;
+                    $username = $data->username;
+                    $tokens = $data->tokens;
+                    $affiliate = $data->affiliate;
+                    $affiliatecount = $data->affiliatecount;
+                    $dateCreated = $data->dateCreated;
+                    self::$bot->sendMessage(
+                        text: "ID: `$id`\n" .
+                            "Username: `@$username`\n " .
+                            "Tokens: `$tokens`\n " .
+                            "Affiliate: `$affiliate`\n " .
+                            "Affiliate Count: `$affiliatecount`\n " .
+                            "Date Created: `$dateCreated`\n ",
+                        parse_mode: 'MarkdownV2',
+                    );
+                }
+                self::$bot->sendMessage("Total Users: $count");
+            } else {
+                self::$bot->sendMessage('You are not an admin');
+            }
+        });
+    }
 }

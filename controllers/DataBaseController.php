@@ -2,7 +2,7 @@
 
 namespace Controllers;
 
-require_once '/home/server/pr/ndfyr/vendor/autoload.php';
+require_once 'vendor/autoload.php';
 
 use RedBeanPHP\R;
 

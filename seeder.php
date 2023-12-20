@@ -5,6 +5,8 @@
     R::setup('mysql:host=localhost;dbname=ndfyr', 'root', '');
     R::exec('CREATE DATABASE IF NOT EXISTS `ndfyr`');
     R::freeze(true);
+    R::exec('DROP TABLE IF EXISTS `users`');
+    R::exec('DROP TABLE IF EXISTS `messages`');
     R::exec('CREATE TABLE IF NOT EXISTS `users` (
         `id` INT AUTO_INCREMENT PRIMARY KEY,
         `username` VARCHAR(255) NOT NULL,
