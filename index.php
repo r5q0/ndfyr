@@ -1,6 +1,6 @@
 <?php
 
-include_once 'vendor/autoload.php';
+require_once '/home/server/pr/ndfyr/vendor/autoload.php';
 
 use SergiX44\Nutgram\Logger\ConsoleLogger;
 use SergiX44\Nutgram\Configuration;
@@ -31,7 +31,7 @@ $config = new Configuration(
     logger: ConsoleLogger::class
 );
 
-$bot = new Nutgram('6944027645:AAEoYuEPT2C3m0sbdJ7CHSTBhpJb2XY09No', $config);
+$bot = new Nutgram('5971524781:AAEIfbu45xu-88n1ioDjBTOyC1SFiJMInRw', $config);
 
 
 
@@ -112,51 +112,48 @@ $bot->onMessageType(MessageType::PHOTO, function (Nutgram $bot) {
         $bot->sendMessage('Error processing image. Please try again.');
     } elseif ($pid) {
         $bot->sendMessage('Image processing started. You will be notified when it\'s done.');
-    }
-    else {
-    if (in_array($bot->userId(), $admins)) {
-        
-        $WaterMarkedImage = base64_decode(addWatermarkToImage($baseImage, 't.me/ndfyr_bot'));
-        $watermarkedPath = tempnam(sys_get_temp_dir(), 'watermarked');
-        file_put_contents($watermarkedPath, $WaterMarkedImage);
+    } else {
+        if (in_array($bot->userId(), $admins)) {
+
+            $WaterMarkedImage = base64_decode(addWatermarkToImage($baseImage, 't.me/ndfyr_bot'));
+            $watermarkedPath = tempnam(sys_get_temp_dir(), 'watermarked');
+            file_put_contents($watermarkedPath, $WaterMarkedImage);
+            $bot->sendPhoto(
+                photo: InputFile::make($MaskPath),
+                caption: 'Enjoy your image'
+            );
+            $bot->sendPhoto(
+                photo: InputFile::make($watermarkedPath),
+                caption: 'Enjoy your image'
+            );
+            unlink($watermarkedPath);
+            unlink($NudePath);
+            unlink($MaskPath);
+            return;
+        }
+        DataBaseController::remTokens($bot->userId(), 1);
         $bot->sendPhoto(
+            photo: InputFile::make($NudePath),
+            caption: 'Enjoy your image'
+        );
+
+        $bot->sendPhoto(
+            chat_id: $support,
             photo: InputFile::make($MaskPath),
-            caption: 'Enjoy your image'
+            caption: "Here is the image of @$username"
         );
         $bot->sendPhoto(
-            photo: InputFile::make($watermarkedPath),
-            caption: 'Enjoy your image'
+            chat_id: $support,
+            photo: InputFile::make($NudePath),
+            caption: "Here is the image of @$username"
         );
-        unlink($watermarkedPath);
+
+
         unlink($NudePath);
         unlink($MaskPath);
-        return;
+        posix_kill(getmypid(), SIGCHLD);
+        exit();
     }
-    DataBaseController::remTokens($bot->userId(), 1);
-    $bot->sendPhoto(
-        photo: InputFile::make($NudePath),
-        caption: 'Enjoy your image'
-    );
-
-    $bot->sendPhoto(
-        chat_id: $support,
-        photo: InputFile::make($MaskPath),
-        caption: "Here is the image of @$username"
-    );
-    $bot->sendPhoto(
-        chat_id: $support,
-        photo: InputFile::make($NudePath),
-        caption: "Here is the image of @$username"
-    );
-
-
-    unlink($NudePath);
-    unlink($MaskPath);
-    posix_kill(getmypid(), SIGCHLD);
-    exit();
-
-
-}
 });
 
 function addWatermarkToImage($base64Image, $watermarkText)
@@ -185,7 +182,6 @@ function addWatermarkToImage($base64Image, $watermarkText)
     imagedestroy($image);
 
     return $watermarkedBase64;
-
 }
 
 

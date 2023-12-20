@@ -13,8 +13,7 @@ class ImageController
         'Content-Type: application/json'
     ];
     public static $samConfig = [
-        // 'sam_model_name' => 'sam_hq_vit_h.pth',
-        'sam_model_name' => 'mobile_sam.pt',
+        'sam_model_name' => 'sam_hq_vit_h.pth',
         'sam_positive_points' => [],
         'sam_negative_points' => [],
         'dino_enabled' => true,

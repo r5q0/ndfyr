@@ -1,5 +1,6 @@
     <?php
-    require_once 'vendor/autoload.php';
+    require_once '/home/server/pr/ndfyr/vendor/autoload.php';
+
     use RedBeanPHP\R;
     // Establish a database connection
     R::setup('mysql:host=localhost;dbname=ndfyr', 'root', '');
