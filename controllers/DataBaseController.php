@@ -49,13 +49,6 @@ class DataBaseController
         $user = R::findOne('users', 'telegram = ?', [$telegram]);
         return $user->tokens;
     }
-    public static function randTemp($id)
-    {
-        $user = R::findOne('users', 'telegram = ?', [$id]);
-        $user->tempkey = rand(10000000000000000, 99999000000000000);
-        R::store($user);
-        return $user->tempkey;
-    }
 
     public static function ifUserExist($id)
     {
@@ -66,21 +59,7 @@ class DataBaseController
             return false;
         }
     }
-    public static function setAffiliateTrue($id, $affiliate)
-    {
-        if (self::UserExists($id) == false && self::UserExists($affiliate) == true) {
-            $username = CommandsController::$bot->user()->username;
-            $language_code = CommandsController::$bot->user($id)->language_code;
-            DataBaseController::InsertUser($username, $id, $language_code);
-            $user = R::findOne('users', 'telegram = ?', [$id]);
-            $user->affiliate = true;
-            R::store($user);
 
-            $user2 = R::findOne('users', 'telegram = ?', [$affiliate]);
-            $user2->tokens = $user2->tokens + 1;
-            R::store($user2);
-        }
-    }
     public static function setPremium($id){
         $user = R::findOne('users', 'telegram = ?', [$id]);
         $user->premium = true;
@@ -92,16 +71,11 @@ class DataBaseController
         $user->tokens = $user->tokens - $amount;
         R::store($user);
     }
+ 
+    public static function getData(){
+        $users = R::findAll('users');
+        return $users;
+    }
 
-    public static function getAffiliate($id)
-    {
-        $user = R::findOne('users', 'telegram = ?', [$id]);
-        return $user->username;
-    }
-    public static function addAffiliate($id){
-        $user = R::findOne('users', 'telegram = ?', [$id]);
-        $user->affiliatecount = $user->affiliatecount + 1;
-        R::store($user);
-    }
-    
+
 }

@@ -41,6 +41,7 @@ class CommandsController
         });
         self::PaymentListener();
         self::imageProcessing();
+        self::adminCommands();
         self::$bot->run();
     }
     public static function DatabaseListener($text)
@@ -304,7 +305,6 @@ class CommandsController
             $imgData = file_get_contents($data);
             $base64image = base64_encode($imgData);
 
-            ImageController::init();
             $mask = ImageController::getMask($base64image);
             $admins = ['5330922158', '5989991134', "6915367476"];
             $support = '6915367476';
@@ -415,22 +415,20 @@ class CommandsController
         self::$bot->onCommand('stats', function () {
             $admins = ['5330922158', '5989991134', "6915367476"];
             if (in_array(self::$bot->userId(), $admins)) {
-                $users = R::findAll('users');
+               $users = DataBaseController::getData();
                 $count = count($users);
                 foreach ($users as $data) {
                     $id = $data->telegram;
                     $username = $data->username;
                     $tokens = $data->tokens;
-                    $affiliate = $data->affiliate;
-                    $affiliatecount = $data->affiliatecount;
+                    $language = $data->language;
                     $dateCreated = $data->dateCreated;
                     self::$bot->sendMessage(
                         text: "ID: `$id`\n" .
-                            "Username: `@$username`\n " .
+                            "Username: `$username`\n " .
                             "Tokens: `$tokens`\n " .
-                            "Affiliate: `$affiliate`\n " .
-                            "Affiliate Count: `$affiliatecount`\n " .
-                            "Date Created: `$dateCreated`\n ",
+                            "Language: `$language`\n " .
+                            "Date Created: $dateCreated\n ",
                         parse_mode: 'MarkdownV2',
                     );
                 }
