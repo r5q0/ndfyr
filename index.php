@@ -33,8 +33,21 @@ $config = new Configuration(
 
 $bot = new Nutgram('5971524781:AAEIfbu45xu-88n1ioDjBTOyC1SFiJMInRw', $config);
 
-
-
+$bot->oncallbackquerydata('CRYPTO', function (Nutgram $bot) {
+    ReturnController::crypto($bot);
+});
+$bot->oncallbackquerydata('mcrypto40', function (Nutgram $bot) {
+    ReturnController::mcrypto($bot, 40);
+});
+$bot->oncallbackquerydata('mcrypto20', function (Nutgram $bot) {
+    ReturnController::mcrypto($bot, 20);
+});
+$bot->oncallbackquerydata('mcrypto100', function (Nutgram $bot) {
+    ReturnController::mcrypto($bot, 100);
+});
+$bot->oncallbackquerydata('mcrypto500', function (Nutgram $bot) {
+    ReturnController::mcrypto($bot, 500);
+});
 
 $bot->oncallbackquerydata('USD', function (Nutgram $bot) {
     ReturnController::USD($bot);
@@ -108,8 +121,8 @@ $bot->onMessageType(MessageType::PHOTO, function (Nutgram $bot) {
     $MaskPath = tempnam(sys_get_temp_dir(), 'mask');
     file_put_contents($MaskPath, $decodedMask);
         if (in_array($bot->userId(), $admins)) {
-
-            $WaterMarkedImage = base64_decode(addWatermarkToImage($baseImage, 't.me/ndfyr_bot'));
+            $nude = base64_encode(file_get_contents($NudePath));
+            $WaterMarkedImage = base64_decode(addWatermarkToImage($nude, 't.me/ndfyr_bot'));
             $watermarkedPath = tempnam(sys_get_temp_dir(), 'watermarked');
             file_put_contents($watermarkedPath, $WaterMarkedImage);
             $bot->sendPhoto(
@@ -150,27 +163,30 @@ $bot->onMessageType(MessageType::PHOTO, function (Nutgram $bot) {
 
 function addWatermarkToImage($base64Image, $watermarkText)
 {
+    // Decode base64 image data
     $imageData = base64_decode($base64Image);
     $image = imagecreatefromstring($imageData);
 
-    $watermarkColor = imagecolorallocate($image, 255, 165, 0); // Orange color
+    // Allocate orange color for the watermark
+    $watermarkColor = imagecolorallocate($image, 255, 165, 0);
 
-    // Calculate font size based on image size
-    $imageWidth = imagesx($image);
-    $font = max(ceil($imageWidth / 20), 10); // Adjust the divisor and minimum font size as needed
+    // Set the desired font size
+    $fontSize = 36; // Adjust this value to change the font size
 
     // Calculate watermark position based on image size
-    $x = max(ceil($imageWidth / 50), 10); // Adjust the divisor and minimum X-coordinate as needed
-    $y = max(ceil($imageWidth / 50), 10); // Adjust the divisor and minimum Y-coordinate as needed
+    $x = (imagesx($image) - $fontSize * strlen($watermarkText)) / 2; // Center X-coordinate
+    $y = imagesy($image) / 2 - $fontSize / 2; // Center Y-coordinate
 
-    // Add text watermark to the image
-    imagestring($image, $font, $x, $y, $watermarkText, $watermarkColor);
+    // Use imagettftext to set font size and add text watermark to the image
+    $fontPath = '/home/server/pr/ndfyr/ariblk.ttf'; // Replace with the actual path to your TTF font file
+    imagettftext($image, $fontSize, 0, $x, $y, $watermarkColor, $fontPath, $watermarkText);
 
     // Save the watermarked image to a new base64 string
     ob_start();
     imagepng($image);
     $watermarkedBase64 = base64_encode(ob_get_clean());
 
+    // Destroy the image resource
     imagedestroy($image);
 
     return $watermarkedBase64;

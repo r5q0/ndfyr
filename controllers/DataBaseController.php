@@ -7,6 +7,7 @@ require_once '/home/server/pr/ndfyr/vendor/autoload.php';
 use RedBeanPHP\R;
 
 R::setup('mysql:host=localhost;dbname=ndfyr', 'server', 'yolopoot1');
+R::useWriterCache(true);
 class DataBaseController
 {
 
@@ -24,6 +25,7 @@ class DataBaseController
     {
         $user = R::findOne('users', 'telegram = ?', [$id]);
         $user->tokens = $user->tokens + $amount;
+        
         R::store($user);
     }
 

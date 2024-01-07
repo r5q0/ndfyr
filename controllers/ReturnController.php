@@ -64,6 +64,39 @@ class ReturnController
         );
     }
 
+    public static function crypto($bot)
+    {
+        $bot->editMessageText(
+      text: "How many tokens do you want to buy? \n".
+                  "We accept USDT(TRC20) and USDT(ERC20) \n".
+                   "Ethereum, Bitcoin, Tron, Monero \n",          
+            reply_markup: InlineKeyboardMarkup::make()->addRow(
+                InlineKeyboardButton::make('20 Tokens (3$)', callback_data: 'mcrypto20'),
+                InlineKeyboardButton::make('40 Tokens (5$)', callback_data: 'mcrypto40')
+            )->addRow(
+                InlineKeyboardButton::make('100 Tokens (10$)', callback_data: 'mcrypto100'),
+                InlineKeyboardButton::make('500 Tokens (25$)', callback_data: 'mcrypto500')
+            )
+                ->addRow(
+                    InlineKeyboardButton::make('Back', callback_data: '/start'),
+                )
+        );
+    }
+
+    public static function mcrypto($bot, $amount){
+
+        $new = new PaymentController();
+        $bot->editMessageText(
+    text: "(This transaction is 100% anonymous)",          
+        reply_markup: InlineKeyboardMarkup::make()->addRow(
+                InlineKeyboardButton::make("Buy ($amount)", url: $new->CreateInvoice($bot->userId(), $amount)),
+            )->addRow(
+                    InlineKeyboardButton::make('Back', callback_data: '/start'),
+                )
+        );
+    }
+
+
 
     public static function startMessageEdit($bot)
     {
@@ -138,6 +171,8 @@ class ReturnController
                 ->addRow(
                     InlineKeyboardButton::make('USD', callback_data: 'USD'),
                     InlineKeyboardButton::make('GBP', callback_data: 'GBP'),
+                )->addRow(
+                    InlineKeyboardButton::make('Crypto', callback_data: 'CRYPTO'),
                 )->addRow(
                     InlineKeyboardButton::make('Back', callback_data: '/start'),
                 )

@@ -63,21 +63,6 @@ class AdminController
         if (in_array($bot->userId(), self::$admins)) {
             $users = DataBaseController::getData();
             $count = count($users);
-            foreach ($users as $data) {
-                $id = $data->telegram;
-                $username = $data->username;
-                $tokens = $data->tokens;
-                $language = $data->language;
-                $dateCreated = $data->dateCreated;
-                $bot->sendMessage(
-                    text: "ID: `$id`\n" .
-                        "Username: `$username`\n " .
-                        "Tokens: `$tokens`\n " .
-                        "Language: `$language`\n " .
-                        "Date Created: $dateCreated\n ",
-                    parse_mode: 'MarkdownV2',
-                );
-            }
             $bot->sendMessage("Total Users: $count");
         } else {
             $bot->sendMessage('You are not an admin');
